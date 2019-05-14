@@ -1,23 +1,40 @@
+#include <iostream>
 #include "WavFile.h"
-
-void applyDelay(WavFile<float>& wav, int delayMillis, float decay)
-{
-	const int delaySamples = static_cast<int>(static_cast<float>(delayMillis) * (wav.sampleRate / 1000.f));
-	for (auto& channel : wav.samples)
-		for (size_t i = 0; i < channel.size() - delaySamples; i++)
-			channel[i + delaySamples] += channel[i] * decay;
-}
+#include "Effects.h"
 
 int main(int argc, char *argv[])
 {
 	WavFile<float> wav;
 
-	if(wav.load("samples/idea.wav"))
+	std::cout << "Loading file..." << std::endl;
+	if (wav.load("samples/guitar.wav"))
 	{
+		std::cout << "File loaded successfully. Summary: " << std::endl;
 		wav.printSummary();
-		applyDelay(wav, 250, 0.5f);
-		wav.save("samples/out_delay.wav");		
+
+		std::cout << "Applying delay effect" << std::endl;
+		if (wav.isStereo())
+		{
+			std::cout << "Stereo file, using delay millis offsets." << std::endl;
+			effects::applyDelay(wav, 0, 556, 0.65f);
+			effects::applyDelay(wav, 0, 443, 0.65f);
+			effects::applyDelay(wav, 1, 278, 0.5f);
+			effects::applyDelay(wav, 1, 221, 0.5f);
+		}
+		else
+		{
+			effects::applyDelay(wav, 500, 0.65f);
+			effects::applyDelay(wav, 250, 0.5f);
+		}
+
+		std::cout << "Saving output file..." << std::endl;
+		if (wav.save("samples/out.wav"))
+			std::cout << "Done successfully." << std::endl;
+		else
+			std::cout << "Saving failed!" << std::endl;
 	}
+	else
+		std::cout << "Loading failed!" << std::endl;
 
 	return 0;
 }

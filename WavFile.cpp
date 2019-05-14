@@ -8,6 +8,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::string;
+using std::clamp;
 
 template <typename T>
 WavFile<T>::WavFile()
@@ -19,7 +20,7 @@ WavFile<T>::WavFile()
 }
 
 template <typename T>
-bool WavFile<T>::save(std::string filename)
+bool WavFile<T>::save(const std::string& filename)
 {
 	FileData fileData;
 	const int32_t dataChunkSize = getNumSamplesPerChannel() * (getNumChannels() * bitDepth / 8);
@@ -103,7 +104,7 @@ bool WavFile<T>::save(std::string filename)
 }
 
 template <typename T>
-bool WavFile<T>::load(std::string filename)
+bool WavFile<T>::load(const std::string& filename)
 {
 	// Open file stream
 	std::ifstream file(filename, std::ios::binary);
@@ -272,6 +273,24 @@ double WavFile<T>::getLengthInSeconds() const
 }
 
 template <typename T>
+bool WavFile<T>::isMono() const
+{
+	return samples.size() == 1;
+}
+
+template <typename T>
+bool WavFile<T>::isStereo() const
+{
+	return samples.size() == 2;	
+}
+
+template <typename T>
+bool WavFile<T>::isMultiTrack() const
+{
+	return samples.size() > 2;
+}
+
+template <typename T>
 void WavFile<T>::printSummary() const
 {
 	cout << "|======================================|" << endl
@@ -354,7 +373,7 @@ int32_t WavFile<T>::fourBytesToInt(FileData& source, int startIndex)
 }
 
 template <typename T>
-int WavFile<T>::getIndexOfStr(FileData source, std::string str) const
+int WavFile<T>::getIndexOfStr(FileData source, const std::string& str) const
 {
 	int idx = -1;
 	const size_t str_len = str.length();
@@ -381,14 +400,14 @@ T WavFile<T>::sixteenBitIntToSample(int16_t sample)
 template <class T>
 int16_t WavFile<T>::sampleToSixteenBitInt(T sample)
 {
-	sample = clamp(sample, -1., 1.);
+	sample = clamp<T>(sample, -1., 1.);
 	return static_cast<int16_t> (sample * 32767.);
 }
 
 template <class T>
 uint8_t WavFile<T>::sampleToSingleByte(T sample)
 {
-	sample = clamp(sample, -1., 1.);
+	sample = clamp<T>(sample, -1., 1.);
 	sample = (sample + 1.) / 2.;
 	return static_cast<uint8_t> (sample * 255.);
 }
@@ -397,14 +416,6 @@ template <class T>
 T WavFile<T>::singleByteToSample(uint8_t sample)
 {
 	return static_cast<T> (sample - 128) / static_cast<T> (128.);
-}
-
-template <typename T>
-T WavFile<T>::clamp(T value, T minValue, T maxValue)
-{
-	value = std::min(value, maxValue);
-	value = std::max(value, minValue);
-	return value;
 }
 
 template class WavFile<float>;

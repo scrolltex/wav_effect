@@ -21,9 +21,15 @@
     <ClCompile Include="WavFile.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Effects.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WavFile.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Effects.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

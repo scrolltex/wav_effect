@@ -11,9 +11,9 @@ public:
 
 	WavFile();
 
-	bool save(std::string filename);
+	bool save(const std::string& filename);
 
-	bool load(std::string filename);
+	bool load(const std::string& filename);
 	
 	int getNumChannels() const;
 	void setNumChannels(int numChannels);
@@ -22,6 +22,10 @@ public:
 	void setNumSamplesPerChannel(int numSamples);
 
 	double getLengthInSeconds() const;
+
+	bool isMono() const;
+	bool isStereo() const;
+	bool isMultiTrack() const;
 
 	void printSummary() const;
 	
@@ -34,7 +38,7 @@ private:
 
 	int16_t twoBytesToInt(FileData& source, int startIndex);
 	int32_t fourBytesToInt(FileData& source, int startIndex);
-	int getIndexOfStr(FileData source, std::string str) const;
+	int getIndexOfStr(FileData source, const std::string& str) const;
 
 	void writeStringToFileData(FileData& fileData, std::string str);
 	void writeInt16ToFileData(FileData& fileData, int16_t i);
@@ -46,6 +50,4 @@ private:
 
 	uint8_t sampleToSingleByte(T sample);
 	T singleByteToSample(uint8_t sample);
-
-	T clamp(T value, T minValue, T maxValue);
 };
