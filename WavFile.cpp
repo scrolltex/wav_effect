@@ -115,9 +115,12 @@ bool WavFile<T>::load(const std::string& filename)
 		return false;
 	}
 
-	file.unsetf(std::ios::skipws);
-	std::istream_iterator<uint8_t> begin(file), end;
-	FileData fileData(begin, end);
+	auto const start_pos = file.tellg();
+	file.ignore(std::numeric_limits<std::streamsize>::max());
+	auto const char_count = file.gcount();
+	file.seekg(start_pos);
+	FileData fileData(char_count);
+	file.read(reinterpret_cast<char*>(&fileData[0]), fileData.size());
 
 	////////////////////////////////////
 	// Read header chunk ///////////////
