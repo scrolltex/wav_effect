@@ -73,7 +73,7 @@ bool WavFile<T>::save(const std::string& filename)
 			}
 			else if (bitDepth == 24)
 			{
-				const auto sampleAsIntAgain = static_cast<int32_t>(samples[channel][i] * static_cast<T>(8388608.));
+				const auto sampleAsIntAgain = static_cast<int32_t>(samples[channel][i] * static_cast<T>(1 << 23));
 
 				uint8_t bytes[3];
 				bytes[2] = static_cast<uint8_t>(sampleAsIntAgain >> 16) & 0xFF;
@@ -83,6 +83,21 @@ bool WavFile<T>::save(const std::string& filename)
 				fileData.push_back(bytes[0]);
 				fileData.push_back(bytes[1]);
 				fileData.push_back(bytes[2]);
+			}
+			else if (bitDepth == 32)
+			{
+				const auto sampleAsIntAgain = static_cast<int32_t>(samples[channel][i] * std::numeric_limits<int32_t>::max());
+
+				uint8_t bytes[4];
+				bytes[3] = static_cast<uint8_t>(sampleAsIntAgain >> 24) & 0xFF;
+				bytes[2] = static_cast<uint8_t>(sampleAsIntAgain >> 16) & 0xFF;
+				bytes[1] = static_cast<uint8_t>(sampleAsIntAgain >> 8) & 0xFF;
+				bytes[0] = static_cast<uint8_t>(sampleAsIntAgain >> 0) & 0xFF;
+
+				fileData.push_back(bytes[0]);
+				fileData.push_back(bytes[1]);
+				fileData.push_back(bytes[2]);
+				fileData.push_back(bytes[3]);
 			}
 			else
 			{
@@ -171,9 +186,9 @@ bool WavFile<T>::load(const std::string& filename)
 	}
 
 	// check bit depth is either 8, 16 or 24 bit
-	if (bitDepth != 8 && bitDepth != 16 && bitDepth != 24)
+	if (bitDepth != 8 && bitDepth != 16 && bitDepth != 24 && bitDepth != 32)
 	{
-		cerr << "Error: this file has a bit depth that is not 8, 16 or 24 bits" << endl;
+		cerr << "Error: this file has a bit depth that is not 8, 16, 24 or 32 bits" << endl;
 		return false;
 	}
 
@@ -210,10 +225,16 @@ bool WavFile<T>::load(const std::string& filename)
 				int32_t sampleAsInt = 0;
 				sampleAsInt = (fileData[sampleIndex + 2] << 16) | (fileData[sampleIndex + 1] << 8) | fileData[sampleIndex];
 
-				if (sampleAsInt & 0x800000) //  if the 24th bit is set, this is a negative number in 24-bit world
+				if (sampleAsInt & (1 << 23)) //  if the 24th bit is set, this is a negative number in 24-bit world
 					sampleAsInt = sampleAsInt | ~0xFFFFFF; // so make sure sign is extended to the 32 bit float
 
-				T sample = static_cast<T>(sampleAsInt) / static_cast<T>(8388608.);
+				T sample = static_cast<T>(sampleAsInt) / static_cast<T>(1 << 23);
+				samples[channel].push_back(sample);
+			}
+			else if (bitDepth == 32)
+			{
+				int32_t sampleAsInt = fourBytesToInt(fileData, sampleIndex);
+				T sample = static_cast<T>(sampleAsInt) / static_cast<T>(std::numeric_limits<std::int32_t>::max());
 				samples[channel].push_back(sample);
 			}
 			else
