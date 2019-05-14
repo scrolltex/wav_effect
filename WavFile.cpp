@@ -21,8 +21,85 @@ WavFile<T>::WavFile()
 template <typename T>
 bool WavFile<T>::save(std::string filename)
 {
-	// UNDONE: saving
-	return false;
+	FileData fileData;
+	const int32_t dataChunkSize = getNumSamplesPerChannel() * (getNumChannels() * bitDepth / 8);
+
+	////////////////////////////////////
+	// Header chunk ////////////////////
+	writeStringToFileData(fileData, "RIFF");
+
+	// The file size in bytes is the header chunk size (4, not counting RIFF and WAVE) + the format
+	// chunk size (24) + the metadata part of the data chunk plus the actual data chunk size
+	const int32_t fileSizeInBytes = 4 + 24 + 8 + dataChunkSize;
+	writeInt32ToFileData(fileData, fileSizeInBytes);
+
+	writeStringToFileData(fileData, "WAVE");
+
+	////////////////////////////////////
+	// Format chunk ////////////////////
+	writeStringToFileData(fileData, "fmt ");
+	writeInt32ToFileData(fileData, 16); // format chunk size (16 for PCM)
+	writeInt16ToFileData(fileData, 1); // audio format = 1
+	writeInt16ToFileData(fileData, static_cast<int16_t>(getNumChannels())); // num channels
+	writeInt32ToFileData(fileData, static_cast<int32_t>(sampleRate)); // sample rate
+
+	const int32_t numBytesPerSecond = static_cast<int32_t>((getNumChannels() * sampleRate * bitDepth) / 8);
+	writeInt32ToFileData(fileData, numBytesPerSecond);
+
+	const int16_t numBytesPerBlock = getNumChannels() * (bitDepth / 8);
+	writeInt16ToFileData(fileData, numBytesPerBlock);
+
+	writeInt16ToFileData(fileData, static_cast<int16_t>(bitDepth));
+	
+	////////////////////////////////////
+	// Data chunk //////////////////////
+	writeStringToFileData(fileData, "data");
+	writeInt32ToFileData(fileData, dataChunkSize);
+
+	for (int i = 0; i < getNumSamplesPerChannel(); i++)
+	{
+		for (int channel = 0; channel < getNumChannels(); channel++)
+		{
+			if (bitDepth == 8)
+			{
+				uint8_t byte = sampleToSingleByte(samples[channel][i]);
+				fileData.push_back(byte);
+			}
+			else if (bitDepth == 16)
+			{
+				const int16_t sampleAsInt = sampleToSixteenBitInt(samples[channel][i]);
+				writeInt16ToFileData(fileData, sampleAsInt);
+			}
+			else if (bitDepth == 24)
+			{
+				const auto sampleAsIntAgain = static_cast<int32_t>(samples[channel][i] * static_cast<T>(8388608.));
+
+				uint8_t bytes[3];
+				bytes[2] = static_cast<uint8_t>(sampleAsIntAgain >> 16) & 0xFF;
+				bytes[1] = static_cast<uint8_t>(sampleAsIntAgain >> 8) & 0xFF;
+				bytes[0] = static_cast<uint8_t>(sampleAsIntAgain) & 0xFF;
+
+				fileData.push_back(bytes[0]);
+				fileData.push_back(bytes[1]);
+				fileData.push_back(bytes[2]);
+			}
+			else
+			{
+				cerr << "Error: Trying to write a file with unsupported bit depth" << endl;
+				return false;
+			}
+		}
+	}
+
+	// check that the various sizes we put in the metadata are correct
+	if (static_cast<size_t>(fileSizeInBytes) != (fileData.size() - 8) || dataChunkSize != (getNumSamplesPerChannel() * getNumChannels() * (bitDepth / 8)))
+	{
+		cerr << "Error: couldn't save file to " << filename << endl;
+		return false;
+	}
+
+	// try to write the file
+	return writeDataToFile(fileData, filename);
 }
 
 template <typename T>
@@ -204,6 +281,56 @@ void WavFile<T>::printSummary() const
 		 << "| Bit Depth: " << bitDepth << endl
 		 << "| Length in Seconds: " << getLengthInSeconds() << endl
 		 << "|======================================|" << endl;
+}
+template <class T>
+void WavFile<T>::writeStringToFileData(FileData& fileData, std::string s)
+{
+    for (auto i : s)
+	    fileData.push_back (static_cast<uint8_t>(i));
+}
+
+template <class T>
+void WavFile<T>::writeInt16ToFileData(FileData& fileData, int16_t i)
+{
+	uint8_t bytes[2];
+	bytes[1] = (i >> 8) & 0xFF;
+	bytes[0] = i & 0xFF;
+
+	fileData.push_back(bytes[0]);
+	fileData.push_back(bytes[1]);
+}
+
+template <class T>
+void WavFile<T>::writeInt32ToFileData(FileData& fileData, int32_t i)
+{
+    uint8_t bytes[4];
+    bytes[3] = (i >> 24) & 0xFF;
+    bytes[2] = (i >> 16) & 0xFF;
+    bytes[1] = (i >> 8) & 0xFF;
+    bytes[0] = i & 0xFF;
+    
+    for(auto byte : bytes)
+	    fileData.push_back(byte);
+}
+
+template <class T>
+bool WavFile<T>::writeDataToFile(FileData& fileData, std::string filename)
+{
+	std::ofstream outputFile(filename, std::ios::binary);
+
+	if (outputFile.is_open())
+	{
+		for (auto ch : fileData)
+		{
+			auto value = static_cast<char>(ch);
+			outputFile.write(&value, sizeof(char));
+		}
+
+		outputFile.close();
+		return true;
+	}
+
+	return false;
 }
 
 template <typename T>

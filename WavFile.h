@@ -36,6 +36,11 @@ private:
 	int32_t fourBytesToInt(FileData& source, int startIndex);
 	int getIndexOfStr(FileData source, std::string str) const;
 
+	void writeStringToFileData(FileData& fileData, std::string str);
+	void writeInt16ToFileData(FileData& fileData, int16_t i);
+	void writeInt32ToFileData(FileData& fileData, int32_t i);
+	bool writeDataToFile(FileData& fileData, std::string filename);
+
 	T sixteenBitIntToSample(int16_t sample);
 	int16_t sampleToSixteenBitInt(T sample);
 
