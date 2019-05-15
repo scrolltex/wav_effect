@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
+#include <utility>
 #include "WavFile.h"
 
 using std::cout;
@@ -20,13 +21,28 @@ WavFile<T>::WavFile()
 }
 
 template <typename T>
+WavFile<T>::WavFile(uint32_t sampleRate, int bitDepth, AudioData samples)
+	: sampleRate(sampleRate), bitDepth(bitDepth), samples(std::move(samples))
+{
+	
+}
+
+template <typename T>
+WavFile<T>::WavFile(const WavFile&& other) noexcept
+{
+	sampleRate = other.sampleRate;
+	bitDepth = other.bitDepth;
+	samples = other.samples;
+}
+
+template <typename T>
 bool WavFile<T>::save(const std::string& filename)
 {
 	FileData fileData;
 	const int32_t dataChunkSize = getNumSamplesPerChannel() * (getNumChannels() * bitDepth / 8);
 
-	////////////////////////////////////
-	// Header chunk ////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Header chunk ////////////////////////////////////////////////////////////
 	writeStringToFileData(fileData, "RIFF");
 
 	// The file size in bytes is the header chunk size (4, not counting RIFF and WAVE) + the format
@@ -36,15 +52,15 @@ bool WavFile<T>::save(const std::string& filename)
 
 	writeStringToFileData(fileData, "WAVE");
 
-	////////////////////////////////////
-	// Format chunk ////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Format chunk ////////////////////////////////////////////////////////////
 	writeStringToFileData(fileData, "fmt ");
 	writeInt32ToFileData(fileData, 16); // format chunk size (16 for PCM)
 	writeInt16ToFileData(fileData, 1); // audio format = 1
 	writeInt16ToFileData(fileData, static_cast<int16_t>(getNumChannels())); // num channels
 	writeInt32ToFileData(fileData, static_cast<int32_t>(sampleRate)); // sample rate
 
-	const int32_t numBytesPerSecond = static_cast<int32_t>((getNumChannels() * sampleRate * bitDepth) / 8);
+	const int32_t numBytesPerSecond = static_cast<int32_t>(getNumChannels() * sampleRate * bitDepth / 8);
 	writeInt32ToFileData(fileData, numBytesPerSecond);
 
 	const int16_t numBytesPerBlock = getNumChannels() * (bitDepth / 8);
@@ -52,8 +68,8 @@ bool WavFile<T>::save(const std::string& filename)
 
 	writeInt16ToFileData(fileData, static_cast<int16_t>(bitDepth));
 	
-	////////////////////////////////////
-	// Data chunk //////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Data chunk //////////////////////////////////////////////////////////////
 	writeStringToFileData(fileData, "data");
 	writeInt32ToFileData(fileData, dataChunkSize);
 
@@ -137,8 +153,8 @@ bool WavFile<T>::load(const std::string& filename)
 	FileData fileData(char_count);
 	file.read(reinterpret_cast<char*>(&fileData[0]), fileData.size());
 
-	////////////////////////////////////
-	// Read header chunk ///////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Read header chunk ///////////////////////////////////////////////////////
 	const string headerChunkId(fileData.begin(), fileData.begin() + 4);
 	const string format(fileData.begin() + 8, fileData.begin() + 12);
 
@@ -153,8 +169,8 @@ bool WavFile<T>::load(const std::string& filename)
 		return false;
 	}
 
-	////////////////////////////////////
-	// Format chunk ////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Format chunk ////////////////////////////////////////////////////////////
 	string formatChunkId(fileData.begin() + formatChunkIndex, fileData.begin() + formatChunkIndex + 4);
 	int16_t audioFormat = twoBytesToInt(fileData, formatChunkIndex + 8);
 	int16_t numChannels = twoBytesToInt(fileData, formatChunkIndex + 10);
@@ -192,8 +208,8 @@ bool WavFile<T>::load(const std::string& filename)
 		return false;
 	}
 
-	////////////////////////////////////
-	// Data chunk //////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	// Data chunk //////////////////////////////////////////////////////////////
 	string dataChunkId(fileData.begin() + dataChunkIndex, fileData.begin() + dataChunkIndex + 4);
 	int32_t dataChunkSize = fourBytesToInt(fileData, dataChunkIndex + 4);
 
@@ -325,10 +341,11 @@ void WavFile<T>::printSummary() const
 		 << "| Length in Seconds: " << getLengthInSeconds() << endl
 		 << "|======================================|" << endl;
 }
+
 template <class T>
-void WavFile<T>::writeStringToFileData(FileData& fileData, std::string s)
+void WavFile<T>::writeStringToFileData(FileData& fileData, const std::string& str)
 {
-    for (auto i : s)
+    for (auto i : str)
 	    fileData.push_back (static_cast<uint8_t>(i));
 }
 
@@ -357,7 +374,7 @@ void WavFile<T>::writeInt32ToFileData(FileData& fileData, int32_t i)
 }
 
 template <class T>
-bool WavFile<T>::writeDataToFile(FileData& fileData, std::string filename)
+bool WavFile<T>::writeDataToFile(FileData& fileData, const std::string& filename)
 {
 	std::ofstream outputFile(filename, std::ios::binary);
 

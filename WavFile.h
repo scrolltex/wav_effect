@@ -6,27 +6,47 @@ template<typename T>
 class WavFile
 {
 public:
+	// Outer container is channels, inner is samples.
 	typedef std::vector<std::vector<T>> AudioData;
+
+	// Binary file data
 	typedef std::vector<uint8_t> FileData;
 
 	WavFile();
+	WavFile(uint32_t sampleRate, int bitDepth, AudioData samples);
+	WavFile(const WavFile& other) = default;
+	WavFile(const WavFile&& other) noexcept;
+	~WavFile() = default;
 
+	WavFile& operator=(const WavFile& other) = default;
+	
+	/**
+	 * \brief Save wave file
+	 * \param filename File to save
+	 * \return The success of the operation
+	 */
 	bool save(const std::string& filename);
 
+	/**
+	 * \brief Load wave file
+	 * \param filename File to load
+	 * \return The success of the operation
+	 */
 	bool load(const std::string& filename);
-	
-	int getNumChannels() const;
+
+	[[nodiscard]] int getNumChannels() const;
 	void setNumChannels(int numChannels);
 
-	int getNumSamplesPerChannel() const;
+	[[nodiscard]] int getNumSamplesPerChannel() const;
 	void setNumSamplesPerChannel(int numSamples);
 
-	double getLengthInSeconds() const;
+	[[nodiscard]] double getLengthInSeconds() const;
 
-	bool isMono() const;
-	bool isStereo() const;
-	bool isMultiTrack() const;
+	[[nodiscard]] bool isMono() const;
+	[[nodiscard]] bool isStereo() const;
+	[[nodiscard]] bool isMultiTrack() const;
 
+	// Prints wave summary to standart out
 	void printSummary() const;
 	
 	uint32_t sampleRate;
@@ -36,18 +56,18 @@ public:
 private:
 	void clearSamples();
 
-	int16_t twoBytesToInt(FileData& source, int startIndex);
-	int32_t fourBytesToInt(FileData& source, int startIndex);
-	int getIndexOfStr(FileData source, const std::string& str) const;
+	static int16_t twoBytesToInt(FileData& source, int startIndex);
+	static int32_t fourBytesToInt(FileData& source, int startIndex);
+	[[nodiscard]] int getIndexOfStr(FileData source, const std::string& str) const;
 
-	void writeStringToFileData(FileData& fileData, std::string str);
-	void writeInt16ToFileData(FileData& fileData, int16_t i);
-	void writeInt32ToFileData(FileData& fileData, int32_t i);
-	bool writeDataToFile(FileData& fileData, std::string filename);
+	static void writeStringToFileData(FileData& fileData, const std::string& str);
+	static void writeInt16ToFileData(FileData& fileData, int16_t i);
+	static void writeInt32ToFileData(FileData& fileData, int32_t i);
+	static bool writeDataToFile(FileData& fileData, const std::string& filename);
 
-	T sixteenBitIntToSample(int16_t sample);
-	int16_t sampleToSixteenBitInt(T sample);
+	static T sixteenBitIntToSample(int16_t sample);
+	static int16_t sampleToSixteenBitInt(T sample);
 
-	uint8_t sampleToSingleByte(T sample);
-	T singleByteToSample(uint8_t sample);
+	static uint8_t sampleToSingleByte(T sample);
+	static T singleByteToSample(uint8_t sample);
 };
