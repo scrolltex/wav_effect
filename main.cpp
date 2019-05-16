@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 		wav.printSummary();
 
 		effects::applyCompressor(wav, -6.f, 3.f);
+		effects::applyVolume(wav, 6.f);
 		/*
 		std::cout << "Applying delay effect" << std::endl;
 		if (wav.isStereo())

@@ -4,11 +4,11 @@
 
 using std::clamp;
 
-void effects::applyVolume(WavFile<float>& wav, float volumeFactor)
+void effects::applyVolume(WavFile<float>& wav, float volume_db)
 {
 	for (auto& channel : wav.samples)
 		for (auto& sample : channel)
-			sample *= volumeFactor;
+			sample = db2lin(lin2db(sample) + volume_db);
 }
 
 void effects::applyReverse(WavFile<float>& wav)

@@ -4,11 +4,11 @@
 namespace effects
 {
 	/**
-	 * \brief Apply 
-	 * \param wav 
-	 * \param volumeFactor 
+	 * \brief Increase volume by volume_db
+	 * \param wav wave file
+	 * \param volume_db How much dB increase
 	 */
-	void applyVolume(WavFile<float>& wav, float volumeFactor);
+	void applyVolume(WavFile<float>& wav, float volume_db);
 	
 	/**
 	 * \brief Apply effect of reversing the sound
