@@ -1,9 +1,8 @@
 #include <algorithm>
 #include "Effects.h"
+#include "utility.h"
 
 using std::clamp;
-
-constexpr float pi = 3.14159265358979323846;
 
 void effects::applyVolume(WavFile<float>& wav, float volumeFactor)
 {
@@ -29,6 +28,23 @@ void effects::applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, f
 	const int delaySamples = static_cast<int>(static_cast<float>(delayMillis) * (wav.sampleRate / 1000.f));
 	for (size_t i = 0; i < wav.samples[channelIdx].size() - delaySamples; i++)
 		wav.samples[channelIdx][i + delaySamples] += wav.samples[channelIdx][i] * decay;
+}
+
+void effects::applyCompressor(WavFile<float>& wav, float threshold, float ratio)
+{
+	for (auto& channel : wav.samples)
+	{
+		for (auto& sample : channel)
+		{
+			const double key_dB = lin2db(abs(sample) + 0.000001f);
+			double over_dB = key_dB - threshold;
+			if (over_dB < 0.0)
+				over_dB = 0.0;
+
+			const auto gr = over_dB * (1./ratio - 1.);
+			sample *= db2lin(gr);
+		}
+	}
 }
 
 void effects::applyDistortion(WavFile<float>& wav, float drive, float blend, float volume)

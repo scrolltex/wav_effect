@@ -7,11 +7,13 @@ int main(int argc, char *argv[])
 	WavFile<float> wav;
 
 	std::cout << "Loading file..." << std::endl;
-	if (wav.load("samples/guitar_32bit_stereo.wav"))
+	if (wav.load("samples/edm.wav"))
 	{
 		std::cout << "File loaded successfully. Summary: " << std::endl;
 		wav.printSummary();
 
+		effects::applyCompressor(wav, -6.f, 3.f);
+		/*
 		std::cout << "Applying delay effect" << std::endl;
 		if (wav.isStereo())
 		{
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
 		{
 			effects::applyDelay(wav, 500, 0.65f);
 			effects::applyDelay(wav, 250, 0.5f);
-		}
+		}*/
 
 		std::cout << "Saving output file..." << std::endl;
 		if (wav.save("samples/out.wav"))

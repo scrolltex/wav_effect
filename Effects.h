@@ -34,6 +34,14 @@ namespace effects
 	void applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, float decay);
 	
 	/**
+	 * \brief Apple compressor effect to wave file
+	 * \param wav wave file
+	 * \param threshold Threshold, dB
+	 * \param ratio Compressing ratio
+	 */
+	void applyCompressor(WavFile<float>& wav, float threshold, float ratio);
+
+	/**
 	 * \brief Apply distortion effect to wave file
 	 * \param wav wave file
 	 * \param drive drive level (0..1)
