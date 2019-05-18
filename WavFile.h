@@ -62,7 +62,12 @@ private:
 	static int16_t twoBytesToInt(FileData& source, int startIndex);
 	static int32_t fourBytesToInt(FileData& source, int startIndex);
 
-
+	/**
+	 * \brief Find the index of the first occurrence of the string
+	 * \param source source data
+	 * \param str string to find for
+	 * \return index of the first occurence if founded, otherwise `std::string::npos`
+	 */
 	[[nodiscard]] static size_t getIndexOfStr(const FileData& source, std::string_view str);
 
 	static void writeStringToFileData(FileData& fileData, const std::string& str);

@@ -162,10 +162,9 @@ bool WavFile<T>::load(const std::string& filename)
 	// Find indexies of format and data chunks
 	const auto formatChunkIndex = getIndexOfStr(fileData, "fmt"); 
 	const auto dataChunkIndex = getIndexOfStr(fileData, "data");
-	constexpr auto npos = std::numeric_limits<size_t>::max();
 
 	// Header must start with RIFF, format must be a WAVE, and file must contains format and data chunks
-	if (headerChunkId != "RIFF" || format != "WAVE" || formatChunkIndex == npos || dataChunkIndex == npos)
+	if (headerChunkId != "RIFF" || format != "WAVE" || formatChunkIndex == string::npos || dataChunkIndex == string::npos)
 	{
 		cerr << "Error: Invalid .wav file." << endl;
 		return false;
@@ -413,7 +412,7 @@ int32_t WavFile<T>::fourBytesToInt(FileData& source, int startIndex)
 template <typename T>
 size_t WavFile<T>::getIndexOfStr(const FileData& source, std::string_view str)
 {
-	size_t idx = std::numeric_limits<size_t>::max();
+	size_t idx = std::string::npos;
 	const size_t str_len = str.length();
 
 	for(size_t i = 0; i < source.size() - str_len; i++)

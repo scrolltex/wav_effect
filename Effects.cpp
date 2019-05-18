@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <stdexcept>
 #include "Effects.h"
 #include "utility.h"
 
@@ -7,7 +8,7 @@ using std::clamp;
 void effects::monoToStereo(WavFile<float>& wav)
 {
 	if (!wav.isMono())
-		return;
+		throw std::invalid_argument("Wave file must be mono");
 
 	wav.setNumChannels(2);
 	std::copy(wav.samples[0].begin(), wav.samples[0].end(), wav.samples[1].begin());
@@ -15,8 +16,11 @@ void effects::monoToStereo(WavFile<float>& wav)
 
 void effects::applyRotatingStereo(WavFile<float>& wav, float rate)
 {
-	if (!wav.isStereo() || rate == 0)
-		return;
+	if (!wav.isStereo())
+		throw std::invalid_argument("Wave file must be a stereo");
+
+	if (rate <= 0)
+		throw std::invalid_argument("Rate must be greater than 0");
 
 	for (size_t i = 0; i < wav.getNumSamplesPerChannel(); i++)
 	{
@@ -45,8 +49,17 @@ void effects::applyDelay(WavFile<float>& wav, int delayMillis, float decay)
 		applyDelay(wav, i, delayMillis, decay);
 }
 
-void effects::applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, float decay)
+void effects::applyDelay(WavFile<float>& wav, size_t channelIdx, int delayMillis, float decay)
 {
+	if (channelIdx >= wav.getNumChannels())
+		throw std::out_of_range("Channel");
+
+	if (delayMillis <= 0 || delayMillis * 0.001 > wav.getLengthInSeconds())
+		throw std::out_of_range("Delay time");
+
+	if (decay <= 0)
+		throw std::invalid_argument("Decay must be greater than 0");
+
 	const int delaySamples = static_cast<int>(static_cast<float>(delayMillis) * (wav.sampleRate / 1000.f));
 	for (size_t i = 0; i < wav.samples[channelIdx].size() - delaySamples; i++)
 		wav.samples[channelIdx][i + delaySamples] += wav.samples[channelIdx][i] * decay;
@@ -95,4 +108,29 @@ void effects::applyDistortion(WavFile<float>& wav, float drive, float blend, flo
 			sample = (2.f / pi * static_cast<float>(atan(sample)) * blend + cleanSample * (1.f - blend)) / 2.f * volume;
 		}
 	}
+}
+
+void effects::applyFadeIn(WavFile<float>& wav, float time)
+{
+	if (time <= 0 || time > wav.getLengthInSeconds())
+		throw std::invalid_argument("Invalid fade time");
+
+	const float fade_samples = time * wav.sampleRate;
+	for(auto& channel : wav.samples)
+		for(size_t i = 0; i < fade_samples && i < wav.getNumSamplesPerChannel(); i++)
+			channel[i] *= static_cast<float>(i) / fade_samples;
+}
+
+void effects::applyFadeOut(WavFile<float>& wav, float time)
+{
+	if (time <= 0 || time > wav.getLengthInSeconds())
+		throw std::invalid_argument("Invalid fade time");
+
+	const size_t samples_count = wav.getNumSamplesPerChannel();
+	const float fade_samples = time * wav.sampleRate; // fade time in samples
+	const size_t start_pos = samples_count - fade_samples; // sample that starts
+
+	for (auto& channel : wav.samples)
+		for (size_t i = start_pos; i < samples_count; i++)
+			channel[i] *= 1.f - (static_cast<float>(i - start_pos) / fade_samples);
 }

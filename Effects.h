@@ -13,6 +13,7 @@ namespace effects
 	 * \brief Apply rotation effect on stereo wave file
 	 * \param wav wave file
 	 * \param rate rotating rate, in seconds
+	 * \throw invalid_argument file not in stereo, or rate <= 0
 	 */
 	void applyRotatingStereo(WavFile<float>& wav, float rate);
 
@@ -34,6 +35,8 @@ namespace effects
 	 * \param wav wave file
 	 * \param delayMillis Delay milliseconds
 	 * \param decay Decay
+	 * \throw out_of_range channel or delay time out of range
+	 * \throw invalid_argument decay <= 0
 	 */
 	void applyDelay(WavFile<float>& wav, int delayMillis, float decay);
 
@@ -43,8 +46,10 @@ namespace effects
 	 * \param channelIdx Channel number for applying effect
 	 * \param delayMillis Delay milliseconds
 	 * \param decay Decay
+	 * \throw out_of_range channel or delay time out of range
+	 * \throw invalid_argument decay <= 0
 	 */
-	void applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, float decay);
+	void applyDelay(WavFile<float>& wav, size_t channelIdx, int delayMillis, float decay);
 
 	/**
 	 * \brief Apply reverberation effect
@@ -68,4 +73,20 @@ namespace effects
 	 * \param volume volume level (0..1). Default is 1.
 	 */
 	void applyDistortion(WavFile<float>& wav, float drive, float blend, float volume = 1.f);
+
+	/**
+	 * \brief Apply fade in
+	 * \param wav wave file
+	 * \param time fade time in seconds
+	 * \throw invalid_argument time <= 0
+	 */
+	void applyFadeIn(WavFile<float>& wav, float time);
+
+	/**
+	 * \brief Apply fade out
+	 * \param wav wave file
+	 * \param time fade time in seconds
+	 * \throw invalid_argument time <= 0
+	 */
+	void applyFadeOut(WavFile<float>& wav, float time);
 }

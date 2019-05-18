@@ -15,8 +15,10 @@ int main(int argc, char *argv[])
 		if(wav.isMono())
 			effects::monoToStereo(wav);
 
-		effects::applyRotatingStereo(wav, 2.f);
+		effects::applyRotatingStereo(wav, 1.f);
 		effects::applyReverberation(wav);
+		effects::applyFadeIn(wav, 2.f);
+		effects::applyFadeOut(wav, 2.f);
 
 		std::cout << "Saving output file..." << std::endl;
 		if (wav.save("samples/out.wav"))
