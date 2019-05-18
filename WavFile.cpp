@@ -73,9 +73,9 @@ bool WavFile<T>::save(const std::string& filename)
 	writeStringToFileData(fileData, "data");
 	writeInt32ToFileData(fileData, dataChunkSize);
 
-	for (int i = 0; i < getNumSamplesPerChannel(); i++)
+	for (size_t i = 0; i < getNumSamplesPerChannel(); i++)
 	{
-		for (int channel = 0; channel < getNumChannels(); channel++)
+		for (size_t channel = 0; channel < getNumChannels(); channel++)
 		{
 			if (bitDepth == 8)
 			{
@@ -124,7 +124,8 @@ bool WavFile<T>::save(const std::string& filename)
 	}
 
 	// check that the various sizes we put in the metadata are correct
-	if (static_cast<size_t>(fileSizeInBytes) != (fileData.size() - 8) || dataChunkSize != (getNumSamplesPerChannel() * getNumChannels() * (bitDepth / 8)))
+	if (static_cast<size_t>(fileSizeInBytes) != (fileData.size() - 8) || 
+		static_cast<size_t>(dataChunkSize)   != (getNumSamplesPerChannel() * getNumChannels() * (bitDepth / 8)))
 	{
 		cerr << "Error: couldn't save file to " << filename << endl;
 		return false;
@@ -161,9 +162,10 @@ bool WavFile<T>::load(const std::string& filename)
 	// Find indexies of format and data chunks
 	const auto formatChunkIndex = getIndexOfStr(fileData, "fmt"); 
 	const auto dataChunkIndex = getIndexOfStr(fileData, "data");
+	constexpr auto npos = std::numeric_limits<size_t>::max();
 
 	// Header must start with RIFF, format must be a WAVE, and file must contains format and data chunks
-	if (headerChunkId != "RIFF" || format != "WAVE" || formatChunkIndex == -1 || dataChunkIndex == -1)
+	if (headerChunkId != "RIFF" || format != "WAVE" || formatChunkIndex == npos || dataChunkIndex == npos)
 	{
 		cerr << "Error: Invalid .wav file." << endl;
 		return false;
@@ -265,13 +267,13 @@ bool WavFile<T>::load(const std::string& filename)
 }
 
 template <typename T>
-int WavFile<T>::getNumChannels() const
+size_t WavFile<T>::getNumChannels() const
 {
-	return static_cast<int>(samples.size());
+	return samples.size();
 }
 
 template <typename T>
-void WavFile<T>::setNumChannels(int numChannels)
+void WavFile<T>::setNumChannels(size_t numChannels)
 {
 	const auto oldNumChannels = getNumChannels();
 	const auto oldNumSamplesPerChannel = getNumSamplesPerChannel();
@@ -289,16 +291,16 @@ void WavFile<T>::setNumChannels(int numChannels)
 }
 
 template <typename T>
-int WavFile<T>::getNumSamplesPerChannel() const
+size_t WavFile<T>::getNumSamplesPerChannel() const
 {
 	return !samples.empty() ? static_cast<int>(samples[0].size()) : 0;
 }
 
 template <typename T>
-void WavFile<T>::setNumSamplesPerChannel(int numSamples)
+void WavFile<T>::setNumSamplesPerChannel(size_t numSamples)
 {
 	const auto oldNumSamples = getNumSamplesPerChannel();
-	for(int i = 0; i < getNumChannels(); i++)
+	for(size_t i = 0; i < getNumChannels(); i++)
 	{
 		samples[i].resize(numSamples);
 		if (numSamples > oldNumSamples)
@@ -380,12 +382,7 @@ bool WavFile<T>::writeDataToFile(FileData& fileData, const std::string& filename
 
 	if (outputFile.is_open())
 	{
-		for (auto ch : fileData)
-		{
-			auto value = static_cast<char>(ch);
-			outputFile.write(&value, sizeof(char));
-		}
-
+		std::copy(fileData.begin(), fileData.end(), std::ostreambuf_iterator<char>(outputFile));
 		outputFile.close();
 		return true;
 	}
@@ -414,14 +411,14 @@ int32_t WavFile<T>::fourBytesToInt(FileData& source, int startIndex)
 }
 
 template <typename T>
-int WavFile<T>::getIndexOfStr(FileData source, const std::string& str) const
+size_t WavFile<T>::getIndexOfStr(const FileData& source, std::string_view str)
 {
-	int idx = -1;
+	size_t idx = std::numeric_limits<size_t>::max();
 	const size_t str_len = str.length();
 
 	for(size_t i = 0; i < source.size() - str_len; i++)
 	{
-		string part(source.begin() + i, source.begin() + i + str_len);
+		std::string part(source.begin() + i, source.begin() + i + str_len);
 		if(part == str)
 		{
 			idx = i;

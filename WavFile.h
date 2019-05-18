@@ -34,11 +34,11 @@ public:
 	 */
 	bool load(const std::string& filename);
 
-	[[nodiscard]] int getNumChannels() const;
-	void setNumChannels(int numChannels);
+	[[nodiscard]] size_t getNumChannels() const;
+	void setNumChannels(size_t numChannels);
 
-	[[nodiscard]] int getNumSamplesPerChannel() const;
-	void setNumSamplesPerChannel(int numSamples);
+	[[nodiscard]] size_t getNumSamplesPerChannel() const;
+	void setNumSamplesPerChannel(size_t numSamples);
 
 	[[nodiscard]] double getLengthInSeconds() const;
 
@@ -58,7 +58,7 @@ private:
 
 	static int16_t twoBytesToInt(FileData& source, int startIndex);
 	static int32_t fourBytesToInt(FileData& source, int startIndex);
-	[[nodiscard]] int getIndexOfStr(FileData source, const std::string& str) const;
+	[[nodiscard]] static size_t getIndexOfStr(const FileData& source, std::string_view str);
 
 	static void writeStringToFileData(FileData& fileData, const std::string& str);
 	static void writeInt16ToFileData(FileData& fileData, int16_t i);
