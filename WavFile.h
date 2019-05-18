@@ -19,18 +19,19 @@ public:
 	~WavFile() = default;
 
 	WavFile& operator=(const WavFile& other) = default;
+	WavFile& operator=(WavFile&& other) = default;
 	
 	/**
 	 * \brief Save wave file
 	 * \param filename File to save
-	 * \return The success of the operation
+	 * \return  true, if saving was successful, otherwise false
 	 */
 	bool save(const std::string& filename);
 
 	/**
 	 * \brief Load wave file
 	 * \param filename File to load
-	 * \return The success of the operation
+	 * \return true, if loading was successful, otherwise false
 	 */
 	bool load(const std::string& filename);
 
@@ -46,7 +47,9 @@ public:
 	[[nodiscard]] bool isStereo() const;
 	[[nodiscard]] bool isMultiTrack() const;
 
-	// Prints wave summary to standart out
+	/**
+	 * \brief Prints wave file summary to standart output
+	 */
 	void printSummary() const;
 	
 	uint32_t sampleRate;
@@ -58,6 +61,8 @@ private:
 
 	static int16_t twoBytesToInt(FileData& source, int startIndex);
 	static int32_t fourBytesToInt(FileData& source, int startIndex);
+
+
 	[[nodiscard]] static size_t getIndexOfStr(const FileData& source, std::string_view str);
 
 	static void writeStringToFileData(FileData& fileData, const std::string& str);

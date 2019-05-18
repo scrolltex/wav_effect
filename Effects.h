@@ -4,6 +4,19 @@
 namespace effects
 {
 	/**
+	 * \brief Convert mono sound to stereo
+	 * \param wav wave file 
+	 */
+	void monoToStereo(WavFile<float>& wav);
+
+	/**
+	 * \brief Apply rotation effect on stereo wave file
+	 * \param wav wave file
+	 * \param rate rotating rate, in seconds
+	 */
+	void applyRotatingStereo(WavFile<float>& wav, float rate);
+
+	/**
 	 * \brief Increase volume by volume_db
 	 * \param wav wave file
 	 * \param volume_db How much dB increase
@@ -17,7 +30,7 @@ namespace effects
 	void applyReverse(WavFile<float>& wav);
 
 	/**
-	 * \brief Apply delay effect to wave file
+	 * \brief Apply delay effect
 	 * \param wav wave file
 	 * \param delayMillis Delay milliseconds
 	 * \param decay Decay
@@ -25,16 +38,22 @@ namespace effects
 	void applyDelay(WavFile<float>& wav, int delayMillis, float decay);
 
 	/**
-	 * \brief Apply delay effect to wave file
+	 * \brief Apply delay effect
 	 * \param wav wave file
 	 * \param channelIdx Channel number for applying effect
 	 * \param delayMillis Delay milliseconds
 	 * \param decay Decay
 	 */
 	void applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, float decay);
-	
+
 	/**
-	 * \brief Apple compressor effect to wave file
+	 * \brief Apply reverberation effect
+	 * \param wav wave file
+	 */
+	void applyReverberation(WavFile<float>& wav);
+
+	/**
+	 * \brief Apple compressor effect
 	 * \param wav wave file
 	 * \param threshold Threshold, dB
 	 * \param ratio Compressing ratio
@@ -42,7 +61,7 @@ namespace effects
 	void applyCompressor(WavFile<float>& wav, float threshold, float ratio);
 
 	/**
-	 * \brief Apply distortion effect to wave file
+	 * \brief Apply distortion effect
 	 * \param wav wave file
 	 * \param drive drive level (0..1)
 	 * \param blend blending level of clean and distorted sound (0..1)

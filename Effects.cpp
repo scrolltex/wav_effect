@@ -4,6 +4,28 @@
 
 using std::clamp;
 
+void effects::monoToStereo(WavFile<float>& wav)
+{
+	if (!wav.isMono())
+		return;
+
+	wav.setNumChannels(2);
+	std::copy(wav.samples[0].begin(), wav.samples[0].end(), wav.samples[1].begin());
+}
+
+void effects::applyRotatingStereo(WavFile<float>& wav, float rate)
+{
+	if (!wav.isStereo() || rate == 0)
+		return;
+
+	for (size_t i = 0; i < wav.getNumSamplesPerChannel(); i++)
+	{
+		const float x = static_cast<float>(i) / static_cast<float>(wav.sampleRate) * rate;
+		wav.samples[0][i] *= sin(x);
+		wav.samples[1][i] *= cos(x);
+	}
+}
+
 void effects::applyVolume(WavFile<float>& wav, float volume_db)
 {
 	for (auto& channel : wav.samples)
@@ -28,6 +50,14 @@ void effects::applyDelay(WavFile<float>& wav, int channelIdx, int delayMillis, f
 	const int delaySamples = static_cast<int>(static_cast<float>(delayMillis) * (wav.sampleRate / 1000.f));
 	for (size_t i = 0; i < wav.samples[channelIdx].size() - delaySamples; i++)
 		wav.samples[channelIdx][i + delaySamples] += wav.samples[channelIdx][i] * decay;
+}
+
+void effects::applyReverberation(WavFile<float>& wav)
+{
+	// TODO: Make reverberation customizable
+	applyDelay(wav, 100, 0.75f);
+	applyDelay(wav, 250, 0.35f);
+	applyDelay(wav, 500, 0.15f);
 }
 
 void effects::applyCompressor(WavFile<float>& wav, float threshold, float ratio)
