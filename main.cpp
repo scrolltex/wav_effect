@@ -2,32 +2,40 @@
 #include "WavFile.h"
 #include "Effects.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 int main(int argc, char *argv[])
 {
 	WavFile<float> wav;
 
-	std::cout << "Loading file..." << std::endl;
+	cout << "Loading file..." << endl;
 	if (wav.load("samples/guitar_32bit_stereo.wav"))
 	{
-		std::cout << "File loaded successfully. Summary: " << std::endl;
+		cout << "File loaded successfully. Summary: " << endl;
 		wav.printSummary();
 
-		if(wav.isMono())
+		if (wav.isMono())
+		{
+			cout << "File in mono. Converting to stereo..." << endl;
 			effects::monoToStereo(wav);
+		}
 
+		cout << "Applying effects..." << endl;
 		effects::applyRotatingStereo(wav, 1.f);
 		effects::applyReverberation(wav);
-		effects::applyFadeIn(wav, 2.f);
-		effects::applyFadeOut(wav, 2.f);
+		effects::applyFadeIn(wav, 2.f, Logarithmic);
+		effects::applyFadeOut(wav, 2.f, Linear);
 
-		std::cout << "Saving output file..." << std::endl;
+		cout << "Saving output file..." << endl;
 		if (wav.save("samples/out.wav"))
-			std::cout << "Done successfully." << std::endl;
+			cout << "Done successfully." << endl;
 		else
-			std::cout << "Saving failed!" << std::endl;
+			cout << "Saving failed!" << endl;
 	}
 	else
-		std::cout << "Loading failed!" << std::endl;
+		cout << "Loading failed!" << endl;
 
 	return 0;
 }

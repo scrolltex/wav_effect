@@ -110,7 +110,7 @@ void effects::applyDistortion(WavFile<float>& wav, float drive, float blend, flo
 	}
 }
 
-void effects::applyFadeIn(WavFile<float>& wav, float time)
+void effects::applyFadeIn(WavFile<float>& wav, float time, CurveType curveType)
 {
 	if (time <= 0 || time > wav.getLengthInSeconds())
 		throw std::invalid_argument("Invalid fade time");
@@ -118,10 +118,10 @@ void effects::applyFadeIn(WavFile<float>& wav, float time)
 	const float fade_samples = time * wav.sampleRate;
 	for(auto& channel : wav.samples)
 		for(size_t i = 0; i < fade_samples && i < wav.getNumSamplesPerChannel(); i++)
-			channel[i] *= static_cast<float>(i) / fade_samples;
+			channel[i] *= applyCurve(static_cast<float>(i) / fade_samples, curveType);
 }
 
-void effects::applyFadeOut(WavFile<float>& wav, float time)
+void effects::applyFadeOut(WavFile<float>& wav, float time, CurveType curveType)
 {
 	if (time <= 0 || time > wav.getLengthInSeconds())
 		throw std::invalid_argument("Invalid fade time");
@@ -132,5 +132,5 @@ void effects::applyFadeOut(WavFile<float>& wav, float time)
 
 	for (auto& channel : wav.samples)
 		for (size_t i = start_pos; i < samples_count; i++)
-			channel[i] *= 1.f - (static_cast<float>(i - start_pos) / fade_samples);
+			channel[i] *= 1.f - applyCurve(static_cast<float>(i - start_pos) / fade_samples, curveType);
 }

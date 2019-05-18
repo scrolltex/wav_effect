@@ -132,6 +132,7 @@
     <ClCompile Include="WavFile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="curve.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="WavFile.h" />

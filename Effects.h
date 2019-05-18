@@ -1,5 +1,6 @@
 #pragma once
 #include "WavFile.h"
+#include "curve.h"
 
 namespace effects
 {
@@ -73,20 +74,22 @@ namespace effects
 	 * \param volume volume level (0..1). Default is 1.
 	 */
 	void applyDistortion(WavFile<float>& wav, float drive, float blend, float volume = 1.f);
-
+	
 	/**
 	 * \brief Apply fade in
 	 * \param wav wave file
 	 * \param time fade time in seconds
+	 * \param curveType fade curve type
 	 * \throw invalid_argument time <= 0
 	 */
-	void applyFadeIn(WavFile<float>& wav, float time);
+	void applyFadeIn(WavFile<float>& wav, float time, CurveType curveType = Linear);
 
 	/**
 	 * \brief Apply fade out
 	 * \param wav wave file
 	 * \param time fade time in seconds
+	 * \param curveType fade curve type
 	 * \throw invalid_argument time <= 0
 	 */
-	void applyFadeOut(WavFile<float>& wav, float time);
+	void applyFadeOut(WavFile<float>& wav, float time, CurveType curveType = Linear);
 }
