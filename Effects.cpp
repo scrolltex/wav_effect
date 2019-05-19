@@ -73,19 +73,24 @@ void effects::applyReverberation(WavFile<float>& wav)
 	applyDelay(wav, 500, 0.15f);
 }
 
-void effects::applyCompressor(WavFile<float>& wav, float threshold, float ratio)
+void effects::applyCompressor(WavFile<float>& wav, float threshold, float ratio, bool downward)
 {
 	for (auto& channel : wav.samples)
 	{
 		for (auto& sample : channel)
 		{
-			const double key_dB = lin2db(abs(sample) + 0.000001f);
-			double over_dB = key_dB - threshold;
-			if (over_dB < 0.0)
-				over_dB = 0.0;
+			const auto sample_db = lin2db(sample);
 
-			const auto gr = over_dB * (1./ratio - 1.);
-			sample *= db2lin(gr);
+			if (downward)
+			{
+				if (sample_db > threshold)
+					sample = sign(sample) * db2lin((sample_db - threshold) / ratio + threshold);				
+			}
+			else
+			{
+				if (sample_db < threshold)
+					sample = sign(sample) * db2lin(threshold - ((threshold - sample_db) / ratio));				
+			}
 		}
 	}
 }

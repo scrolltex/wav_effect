@@ -22,7 +22,7 @@ enum CurveType
 	{
 		case Logarithmic: return log(1.f / (1.f - (exp(1.f) - 1.f) * (x - 1.f))) + 1.f;
 		case Sine: return pow(sin((5.f * x) / pi), 2);
-		case Linear: [[fallthrough]]
+		case Linear:
 		default: return x;
 	}
 }

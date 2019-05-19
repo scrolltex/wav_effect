@@ -64,7 +64,7 @@ namespace effects
 	 * \param threshold Threshold, dB
 	 * \param ratio Compressing ratio
 	 */
-	void applyCompressor(WavFile<float>& wav, float threshold, float ratio);
+	void applyCompressor(WavFile<float>& wav, float threshold, float ratio, bool downward = true);
 
 	/**
 	 * \brief Apply distortion effect

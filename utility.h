@@ -8,10 +8,10 @@ constexpr float pi = 3.14159265358979323846f;
  * \param volume linear volume
  * \return decibels
  */
-inline float lin2db(float volume)
+inline float lin2db(float volume) noexcept
 {
 	static const float log_2_db = 20.f / log(10.f);
-	return log(volume)* log_2_db;
+	return log(abs(volume) + 0.0001f)* log_2_db;
 }
 
 /**
@@ -19,7 +19,7 @@ inline float lin2db(float volume)
  * \param dB decibels
  * \return linear volume
  */
-inline float db2lin(float dB)
+inline float db2lin(float dB) noexcept
 {
 	static const float db_2_log = log(10.f) / 20.f;
 	return exp(dB * db_2_log);

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	WavFile<float> wav;
 
 	cout << "Loading file..." << endl;
-	if (wav.load("samples/guitar_32bit_stereo.wav"))
+	if (wav.load("samples/edm.wav"))
 	{
 		cout << "File loaded successfully. Summary: " << endl;
 		wav.printSummary();
@@ -32,10 +32,10 @@ int main(int argc, char *argv[])
 		if (wav.save("samples/out.wav"))
 			cout << "Done successfully." << endl;
 		else
-			cout << "Saving failed!" << endl;
+			cerr << "Saving failed!" << endl;
 	}
 	else
-		cout << "Loading failed!" << endl;
+		cerr << "Loading failed!" << endl;
 
 	return 0;
 }
