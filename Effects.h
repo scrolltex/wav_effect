@@ -92,4 +92,13 @@ namespace effects
 	 * \throw invalid_argument time <= 0
 	 */
 	void applyFadeOut(WavFile<float>& wav, float time, CurveType curveType = Linear);
+
+	/**
+	 * \brief Apply tremolo effect
+	 * \param wav wave file
+	 * \param freq frequency of tremolo in Herz
+	 * \param dry 
+	 * \param wet
+	 */
+	void applyTremolo(WavFile<float>& wav, float freq, float dry = 0.5f, float wet = 0.5f);
 }

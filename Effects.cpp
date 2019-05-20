@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <stdexcept>
+#include <vector>
 #include "Effects.h"
 #include "utility.h"
+#include "generator.h"
 
 using std::clamp;
 
@@ -138,4 +140,18 @@ void effects::applyFadeOut(WavFile<float>& wav, float time, CurveType curveType)
 	for (auto& channel : wav.samples)
 		for (size_t i = start_pos; i < samples_count; i++)
 			channel[i] *= 1.f - applyCurve(static_cast<float>(i - start_pos) / fade_samples, curveType);
+}
+
+void effects::applyTremolo(WavFile<float>& wav, float freq, float dry, float wet)
+{
+	dry = clamp(dry, 0.f, 1.f);
+	wet = clamp(wet, 0.f, 1.f);
+
+	const auto sineWave = generateSineWave(freq, 
+		static_cast<float>(wav.getNumSamplesPerChannel()) / wav.sampleRate, 
+		wav.sampleRate);
+
+	for (auto& channel : wav.samples)
+		for (size_t i = 0; i < channel.size(); i++)
+			channel[i] = (channel[i] * dry) + ((channel[i] * (sineWave[i] / 2.f + 0.5f)) * wet);
 }

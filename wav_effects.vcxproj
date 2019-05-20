@@ -128,12 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Effects.cpp" />
+    <ClCompile Include="generator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="WavFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="curve.h" />
     <ClInclude Include="Effects.h" />
+    <ClInclude Include="generator.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	WavFile<float> wav;
 
 	cout << "Loading file..." << endl;
-	if (wav.load("samples/edm.wav"))
+	if (wav.load("samples/guitar_32bit_stereo.wav"))
 	{
 		cout << "File loaded successfully. Summary: " << endl;
 		wav.printSummary();
@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 		}
 
 		cout << "Applying effects..." << endl;
+		effects::applyTremolo(wav, 10);
 		effects::applyRotatingStereo(wav, 1.f);
 		effects::applyReverberation(wav);
 		effects::applyFadeIn(wav, 2.f, Logarithmic);
