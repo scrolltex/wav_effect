@@ -11,7 +11,7 @@ std::vector<float> generateSilence(float length, float sampleRate)
 
 std::vector<float> generateWaveInput(float freq, float length, float sampleRate, float phase)
 {
-	length = floor(length * sampleRate);
+	length = ceil(length * sampleRate);
 	phase *= sampleRate;
 	const float factor = freq * (pi * 2) / sampleRate;
 

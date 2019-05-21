@@ -134,7 +134,7 @@ void effects::applyFadeOut(WavFile<float>& wav, float time, CurveType curveType)
 		throw std::invalid_argument("Invalid fade time");
 
 	const size_t samples_count = wav.getNumSamplesPerChannel();
-	const float fade_samples = time * wav.sampleRate; // fade time in samples
+	const size_t fade_samples = time * wav.sampleRate; // fade time in samples
 	const size_t start_pos = samples_count - fade_samples; // sample that starts
 
 	for (auto& channel : wav.samples)
@@ -150,7 +150,7 @@ void effects::applyTremolo(WavFile<float>& wav, float freq, float dry, float wet
 	const auto sineWave = generateSineWave(freq, 
 		static_cast<float>(wav.getNumSamplesPerChannel()) / wav.sampleRate, 
 		wav.sampleRate);
-
+	
 	for (auto& channel : wav.samples)
 		for (size_t i = 0; i < channel.size(); i++)
 			channel[i] = (channel[i] * dry) + ((channel[i] * (sineWave[i] / 2.f + 0.5f)) * wet);

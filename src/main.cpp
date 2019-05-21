@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	WavFile<float> wav;
 
 	cout << "Loading file..." << endl;
-	if (wav.load("samples/guitar_32bit_stereo.wav"))
+	if (wav.load("../samples/guitar_32bit_stereo.wav"))
 	{
 		cout << "File loaded successfully. Summary: " << endl;
 		wav.printSummary();
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 		effects::applyFadeOut(wav, 2.f, Linear);
 
 		cout << "Saving output file..." << endl;
-		if (wav.save("samples/out.wav"))
+		if (wav.save("out.wav"))
 			cout << "Done successfully." << endl;
 		else
 			cerr << "Saving failed!" << endl;
