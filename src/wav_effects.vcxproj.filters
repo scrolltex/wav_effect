@@ -1,44 +1,60 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Исходные файлы">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="src">
+      <UniqueIdentifier>{99116ff0-55eb-4ff7-9614-64222b42e2f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Файлы заголовков">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="src\Menu">
+      <UniqueIdentifier>{6e5470d6-ced5-4eda-a437-1c76236dec54}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="WavFile.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Effects.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="generator.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\MainMenu.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\ApplyEffectMenu.cpp">
+      <Filter>src\Menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WavFile.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="curve.h">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="Effects.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="utility.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="curve.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="generator.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="WavFile.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\Menu.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\MainMenu.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\ApplyEffectMenu.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\WavManager.h">
+      <Filter>src\Menu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

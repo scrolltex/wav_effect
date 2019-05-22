@@ -1,116 +1,93 @@
+#include <conio.h>
 #include <iostream>
+#include <vector>
+#include <string>
+#include <stack>
+#include <functional>
 #include <filesystem>
-#include "WavFile.h"
-#include "Effects.h"
+#include "Menu/Menu.h"
+#include "Menu/MainMenu.h"
+#include "Menu/WavManager.h"
 
-using std::cin;
-using std::cout;
-using std::cerr;
-using std::endl;
+using namespace std;
 namespace fs = std::filesystem;
-using namespace effects;
 
-/**
- * \brief Print usage to stdout
- * \param programName name of program binary
- */
-void printUsage(std::string_view programName)
+std::stack<unique_ptr<Menu>> menuStack;
+
+enum KeyCode
 {
-	cout << "Usage: " << programName << " in.wav [out.wav]" << endl;
-}
+	Enter = 13,
+	SpecialKeys = 224,
+	ArrowUp = 72,
+	ArrowDown = 80
+};
 
-// Print all available commands
-void printAvailableCommands()
-{
-	// TODO: add available commands
-	cout << "Available commands: " << endl;
-}
-
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
 	// If filepath not specified, or user type help - print usage
 	if (argc < 2 || argc > 3 || strstr(argv[1], "help") != nullptr)
 	{
-		printUsage(fs::path(argv[0]).stem().u8string());
+		const auto programName = fs::path(argv[0]).stem().u8string();
+		cout << "Usage: " << programName << " in.wav [out.wav]" << endl;
 		return 0;
 	}
 	
-	const fs::path filepath = argv[1]; // filepath to original wave file
-	const fs::path out_filepath =  // filepath to output wave file
-		argc == 3 ? argv[2] : fs::current_path() / ("out-" + filepath.stem().u8string() + ".wav");
+	WavManager& wm = WavManager::get();
+	wm.filepath = argv[1]; // filepath to original wave file
+	wm.out_filepath =  // filepath to output wave file
+		argc == 3 ? argv[2] : fs::current_path() / ("out-" + wm.filepath.stem().u8string() + ".wav");
 
 	// check for file existence
-	if (!fs::exists(filepath) || !fs::is_regular_file(filepath))
+	if (!fs::exists(wm.filepath) || !fs::is_regular_file(wm.filepath))
 	{
 		cerr << "File not exists, or it is not a file!" << endl;
 		return 1;
 	}
 
-	// Wave file loader
-	WavFile<float> wav;
-
-	// Load wave file
-	cout << "Loading wave file...";
-	if (!wav.load(filepath.u8string()))
+	// Push MainMenu into stack
+	menuStack.push(make_unique<MainMenu>(&menuStack));
+	while(true)
 	{
-		cerr << "Error: can`t load this file as wave file!" << endl;
-		return 1;
-	}
-	cout << "Done" << endl;
-	
-	// Print wave file header
-	cout << "File summary:" << endl;
-	wav.printSummary();
-	cout << endl;
+		// Quit if no menu to show
+		if (menuStack.empty())
+			break;
 
-	int cmd = 0;
-	bool isRunning = true;	
-	do // Commands loop
-	{
-		printAvailableCommands();
-		cout << "Enter command: ";
-		cin >> cmd;
+		const vector<string>& currentMenuItems = menuStack.top()->getMenuItems();
+		size_t& selectedIndex = menuStack.top()->selectedIndex;
 
-		// TODO: add more commands
-		// TODO: add effects params setup by console
-		switch (cmd)
+		//TODO: Print information about loaded file
+
+		// Draw menu
+		system("cls");
+		for (size_t i = 0; i < currentMenuItems.size(); i++)
 		{
-			case -1: // Quit without saving
-			{
-				cout << "Unsaved data may be lost! You realy want to exit? (y/n): ";
-				std::string answer;
-				cin >> answer;
-				if(answer == "y" || answer == "Y")
-					isRunning = false;
-				break;					
-			}
-
-			case 0: // Quit with saving
-				// TODO: add lazy effects applying
-				cout << "Applying effects..." << endl;
-
-				if (wav.isMono())
-					monoToStereo(wav);
-
-				applyTremolo(wav, 10);
-				applyRotatingStereo(wav, 1.f);
-				applyReverberation(wav);
-				applyFadeIn(wav, 2.f, Logarithmic);
-				applyFadeOut(wav, 2.f, Linear);
-
-				cout << "Saving... ";
-				if (!wav.save(out_filepath.u8string()))
-					cerr << "Saving failed!" << endl;
-				else
-				{
-					cout << "Saved" << endl;
-					isRunning = false;
-				}
-				break;
-
-			default: cout << "Unknown command" << endl;
+			cout << (i == selectedIndex ? '>' : ' ');
+			cout << currentMenuItems[i];
+			cout << (i == selectedIndex ? '<' : ' ');
+			cout << endl;
 		}
-	} while (isRunning);
+
+		// Key handling
+		auto keyCode = _getch();
+		if(keyCode == Enter)  // Enter
+		{
+			menuStack.top()->onSelect();
+		}
+		else if (keyCode == SpecialKeys) // Navigation via arrows
+		{
+			keyCode = _getch();
+			if (keyCode == ArrowUp) // Up
+			{
+				if (--selectedIndex == std::numeric_limits<size_t>::max())
+					selectedIndex = currentMenuItems.size() - 1;
+			}
+			else if (keyCode == ArrowDown) // Down
+			{
+				if (++selectedIndex > currentMenuItems.size())
+					selectedIndex = 0;
+			}
+		}
+	}
 
 	return 0;
 }

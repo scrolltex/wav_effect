@@ -132,12 +132,18 @@
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="generator.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Menu\ApplyEffectMenu.cpp" />
+    <ClCompile Include="Menu\MainMenu.cpp" />
     <ClCompile Include="WavFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="curve.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="generator.h" />
+    <ClInclude Include="Menu\ApplyEffectMenu.h" />
+    <ClInclude Include="Menu\MainMenu.h" />
+    <ClInclude Include="Menu\Menu.h" />
+    <ClInclude Include="Menu\WavManager.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
