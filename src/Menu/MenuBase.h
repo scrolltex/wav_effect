@@ -11,6 +11,7 @@ enum KeyCode
 {
 	Enter = 13,
 	Escape = 27,
+	Space = 32,
 
 	SpecialKeys = 224,
 	ArrowUp = 72,
@@ -75,12 +76,14 @@ public:
 	}
 
 	/**
-	 * \brief Wait for escape press
+	 * \brief Wait for escape/space/enter press
 	 */
 	static void waitForEscape()
 	{
 		std::cout << "Press escape to continue" << std::endl;
-		while(_getch() != Escape);
+		int keyCode;
+		do keyCode = _getch();
+		while(keyCode != Escape && keyCode != Space && keyCode != Enter);
 	}
 
 	/**

@@ -17,4 +17,19 @@ private:
 	void volume() const;
 	void reverberation() const;
 	void rotating() const;
+	void fade() const;
+	void tremolo() const;
+	void delay() const;
+	void compressor() const;
+	void distortion() const;
+
+	static bool greaterThanZero(float value)
+	{
+		return value > 0;
+	}
+
+	static bool isNormalizedValue(float value)
+	{
+		return value >= 0.f && value <= 1.f;
+	}
 };

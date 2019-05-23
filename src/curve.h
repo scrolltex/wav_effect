@@ -4,7 +4,7 @@
 
 enum CurveType
 {
-	Linear,
+	Linear = 1,
 	Logarithmic,
 	Sine
 };
