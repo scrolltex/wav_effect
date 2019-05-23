@@ -142,7 +142,7 @@
     <ClInclude Include="generator.h" />
     <ClInclude Include="Menu\ApplyEffectMenu.h" />
     <ClInclude Include="Menu\MainMenu.h" />
-    <ClInclude Include="Menu\Menu.h" />
+    <ClInclude Include="Menu\MenuBase.h" />
     <ClInclude Include="Menu\WavManager.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="WavFile.h" />

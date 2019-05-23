@@ -5,23 +5,14 @@
 #include <stack>
 #include <functional>
 #include <filesystem>
-#include "Menu/Menu.h"
+#include "Menu/MenuBase.h"
 #include "Menu/MainMenu.h"
 #include "Menu/WavManager.h"
 
 using namespace std;
 namespace fs = std::filesystem;
 
-std::stack<unique_ptr<Menu>> menuStack;
-
-enum KeyCode
-{
-	Enter = 13,
-	SpecialKeys = 224,
-	ArrowUp = 72,
-	ArrowDown = 80
-};
-
+std::stack<unique_ptr<MenuBase>> menuStack;
 int main(int argc, char** argv)
 {
 	// If filepath not specified, or user type help - print usage
@@ -31,8 +22,8 @@ int main(int argc, char** argv)
 		cout << "Usage: " << programName << " in.wav [out.wav]" << endl;
 		return 0;
 	}
-	
-	WavManager& wm = WavManager::get();
+
+	auto& wm = WavManager::get();
 	wm.filepath = argv[1]; // filepath to original wave file
 	wm.out_filepath =  // filepath to output wave file
 		argc == 3 ? argv[2] : fs::current_path() / ("out-" + wm.filepath.stem().u8string() + ".wav");
@@ -41,6 +32,14 @@ int main(int argc, char** argv)
 	if (!fs::exists(wm.filepath) || !fs::is_regular_file(wm.filepath))
 	{
 		cerr << "File not exists, or it is not a file!" << endl;
+		return 1;
+	}
+
+	// Load file
+	cout << "File is loading..." << endl;
+	if(!wm.wav.load(wm.filepath.string()))
+	{
+		cerr << "File loading failed!" << endl;
 		return 1;
 	}
 
@@ -59,6 +58,14 @@ int main(int argc, char** argv)
 
 		// Draw menu
 		system("cls");
+
+		const auto title = menuStack.top()->getTitle();
+		if (!title.empty())
+		{
+			cout << title << endl;
+			cout << string(title.length(), '-') << endl;
+		}
+
 		for (size_t i = 0; i < currentMenuItems.size(); i++)
 		{
 			cout << (i == selectedIndex ? '>' : ' ');
@@ -69,7 +76,7 @@ int main(int argc, char** argv)
 
 		// Key handling
 		auto keyCode = _getch();
-		if(keyCode == Enter)  // Enter
+		if (keyCode == Enter)  // Enter
 		{
 			menuStack.top()->onSelect();
 		}
@@ -83,8 +90,17 @@ int main(int argc, char** argv)
 			}
 			else if (keyCode == ArrowDown) // Down
 			{
-				if (++selectedIndex > currentMenuItems.size())
+				if (++selectedIndex >= currentMenuItems.size())
 					selectedIndex = 0;
+			}
+		}
+		else if (keyCode >= Key1 && keyCode <= Key9) // Select via numbers
+		{
+			const size_t idx = keyCode - Key1;
+			if (idx < currentMenuItems.size())
+			{
+				menuStack.top()->selectedIndex = idx;
+				menuStack.top()->onSelect();
 			}
 		}
 	}

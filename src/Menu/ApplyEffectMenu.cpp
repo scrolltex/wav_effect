@@ -6,8 +6,9 @@
 using namespace std;
 using namespace effects;
 
-ApplyEffectMenu::ApplyEffectMenu(std::stack<std::unique_ptr<Menu>>* menuStack): Menu(menuStack)
+ApplyEffectMenu::ApplyEffectMenu(stack<unique_ptr<MenuBase>>* menuStack) : MenuBase(menuStack)
 {
+	m_title = "Apply effect";
 	m_menuItems = {
 		"Back",
 		"Mono -> Stereo",
@@ -55,7 +56,7 @@ void ApplyEffectMenu::onSelect()
 	}
 
 	m_wm.isFileUnsaved = true;
-	pressAnyKey();
+	waitForEscape();
 }
 
 void ApplyEffectMenu::monoToStereo() const
@@ -80,9 +81,8 @@ void ApplyEffectMenu::reverse() const
 
 void ApplyEffectMenu::volume() const
 {
-	cout << "Enter volume for increasing in dB:";
-	float volume = 0;
-	cin >> volume;
+	cout << "Enter volume for increasing in dB: ";
+	const auto volume = readValue<float>();
 
 	cout << "Applying volume...";
 	applyVolume(m_wm.wav, volume);
@@ -111,8 +111,7 @@ void ApplyEffectMenu::rotating() const
 	}
 
 	cout << "Enter rotating rate in seconds: ";
-	float rate = 0;
-	cin >> rate;
+	const auto rate = readValue<float>([](auto value) { return value > 0; });
 
 	cout << "Applying rotating...";
 	applyRotatingStereo(m_wm.wav, rate);

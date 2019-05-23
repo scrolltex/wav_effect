@@ -4,9 +4,11 @@
 
 using namespace std;
 
-MainMenu::MainMenu(stack<unique_ptr<Menu>>* menuStack): Menu(menuStack)
+MainMenu::MainMenu(stack<unique_ptr<MenuBase>>* menuStack) : MenuBase(menuStack)
 {
+	m_title = "Main menu";
 	m_menuItems = {
+		"Show file summary",
 		"Apply effect",
 		"Save",
 		"Quit"
@@ -17,20 +19,32 @@ void MainMenu::onSelect()
 {
 	switch (selectedIndex)
 	{
-		case 0: // Apply effect
+		case 0: // Show file summary
+			showFileSummary();
+			break;
+
+		case 1: // Apply effect
 			navigateTo<ApplyEffectMenu>();
 			break;
 
-		case 1: // Save
+		case 2: // Save
 			save();
 			break;
 
-		case 2: // Quit
+		case 3: // Quit
 			quit();
 			break;
 
 		default: ;
 	}
+}
+
+void MainMenu::showFileSummary() const
+{
+	system("cls");
+	cout << " Loaded file: " << m_wm.filepath.string() << endl;
+	m_wm.wav.printSummary();
+	waitForEscape();
 }
 
 void MainMenu::save() const
@@ -44,7 +58,7 @@ void MainMenu::save() const
 		cout << "Failed" << endl;
 
 	m_wm.isFileUnsaved = false;
-	pressAnyKey();
+	waitForEscape();
 }
 
 void MainMenu::quit()

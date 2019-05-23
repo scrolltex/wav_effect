@@ -1,11 +1,11 @@
 #pragma once
-#include "Menu.h"
+#include "MenuBase.h"
 #include "WavManager.h"
 
-class ApplyEffectMenu : public Menu
+class ApplyEffectMenu : public MenuBase
 {
 public:
-	explicit ApplyEffectMenu(std::stack<std::unique_ptr<Menu>>* menuStack);
+	explicit ApplyEffectMenu(std::stack<std::unique_ptr<MenuBase>>* menuStack);
 
 	void onSelect() override;
 

@@ -44,16 +44,16 @@
     <ClInclude Include="WavFile.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\Menu.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu\MainMenu.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
     <ClInclude Include="Menu\ApplyEffectMenu.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClInclude Include="Menu\WavManager.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\MenuBase.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\MainMenu.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
   </ItemGroup>
