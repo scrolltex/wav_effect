@@ -124,8 +124,7 @@ void ApplyEffectMenu::rotating() const
 {
 	if (m_wm.wav.isMono())
 	{
-		cout << "File must be in stereo. Convert into it?" << endl;
-		if (!dialog())
+		if (!dialog("File must be in stereo. Convert into it?"))
 		{
 			cout << "Aborting." << endl;
 			return;
@@ -151,7 +150,7 @@ void ApplyEffectMenu::fade() const
 
 	// Enter time
 	cout << "Enter fade time in seconds: ";
-	const auto fadeTime = readValue<float>([](auto value) { return value > 0; });
+	const auto fadeTime = readValue<float>([&](auto value) { return value > 0 && value < m_wm.wav.getLengthInSeconds(); });
 
 	// Enter curve
 	cout << "Curve type:" << endl
@@ -212,8 +211,7 @@ void ApplyEffectMenu::compressor() const
 	cout << "Enter ratio:";
 	const auto ratio = readValue<float>([](auto value) { return value >= 1; });
 
-	cout << "Compress downward?" << endl;
-	const bool downward = dialog();
+	const bool downward = dialog("Compress downward?");
 
 	cout << "Applying compressor...";
 	applyCompressor(m_wm.wav, threshold, ratio, downward);

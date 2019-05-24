@@ -61,14 +61,12 @@ void MainMenu::save() const
 	waitForEscape();
 }
 
-void MainMenu::quit()
+void MainMenu::quit() const
 {
 	if(m_wm.isFileUnsaved)
 	{
-		cout << "Wave file has unsaved changes that can be lost." << endl
-			<< "You really want to quit?" << endl;
-
-		if (!dialog())
+		const auto msg = "Wave file has unsaved changes that can be lost.\nYou really want to quit?";
+		if (!dialog(msg))
 			return;
 	}
 

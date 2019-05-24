@@ -14,5 +14,5 @@ private:
 
 	void showFileSummary() const;
 	void save() const;
-	void quit();
+	void quit() const;
 };

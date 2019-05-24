@@ -89,9 +89,10 @@ public:
 	/**
 	 * \brief Wait for user answering
 	 */
-	static bool dialog()
+	static bool dialog(std::string_view msg)
 	{
-		std::cout << "Answer (y/n): ";
+		std::cout << msg << std::endl
+			<< "Answer (y/n): ";
 		char answer;
 		std::cin >> answer;
 
