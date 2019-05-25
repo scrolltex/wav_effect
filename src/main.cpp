@@ -12,7 +12,98 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-std::stack<unique_ptr<MenuBase>> menuStack;
+/**
+ * \brief Run menu
+ * \tparam BaseState First menu state
+ * \returns Exit code
+ */
+template<typename BaseState>
+int runMenu()
+{
+	static_assert(std::is_base_of<MenuBase, BaseState>::value, "BaseState must inherit from MenuBase");
+
+	// Push MainMenu into stack
+	MenuStack stack;
+	stack.push(make_unique<BaseState>(&stack));
+
+	while (true)
+	{
+		// Quit if no menu to show
+		if (stack.empty())
+			break;
+
+		const auto& currentMenuItems = stack.top()->getMenuItems();
+		auto& selectedIndex = stack.top()->selectedIndex;
+
+		// Draw menu
+		system("cls");
+
+		const auto title = stack.top()->getTitle();
+		if (!title.empty())
+		{
+			cout << title << endl;
+			cout << string(title.length(), '-') << endl;
+		}
+
+		for (size_t i = 0; i < currentMenuItems.size(); i++)
+		{
+			cout << (i == selectedIndex ? '>' : ' ');
+			cout << currentMenuItems[i];
+			cout << (i == selectedIndex ? '<' : ' ');
+			cout << endl;
+		}
+
+		// Key handling
+		auto keyCode = _getch();
+		if (keyCode == Enter)  // Enter
+		{
+			try
+			{
+				stack.top()->onSelect();
+			}
+			catch (std::exception& ex)
+			{
+				std::cerr << "Error: " << ex.what() << endl;
+				return 1;
+			}
+		}
+		else if (keyCode == SpecialKeys) // Navigation via arrows
+		{
+			keyCode = _getch();
+			if (keyCode == ArrowUp) // Up
+			{
+				if (--selectedIndex == std::numeric_limits<size_t>::max())
+					selectedIndex = currentMenuItems.size() - 1;
+			}
+			else if (keyCode == ArrowDown) // Down
+			{
+				if (++selectedIndex >= currentMenuItems.size())
+					selectedIndex = 0;
+			}
+		}
+		else if (keyCode >= Key1 && keyCode <= Key9) // Select via numbers
+		{
+			const size_t idx = keyCode - Key1;
+			if (idx < currentMenuItems.size())
+			{
+				stack.top()->selectedIndex = idx;
+
+				try
+				{
+					stack.top()->onSelect();
+				}
+				catch (std::exception& ex)
+				{
+					std::cerr << "Error: " << ex.what() << endl;
+					return 1;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
 	// If filepath not specified, or user type help - print usage
@@ -43,67 +134,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	// Push MainMenu into stack
-	menuStack.push(make_unique<MainMenu>(&menuStack));
-	while(true)
-	{
-		// Quit if no menu to show
-		if (menuStack.empty())
-			break;
-
-		const vector<string>& currentMenuItems = menuStack.top()->getMenuItems();
-		size_t& selectedIndex = menuStack.top()->selectedIndex;
-
-		//TODO: Print information about loaded file
-
-		// Draw menu
-		system("cls");
-
-		const auto title = menuStack.top()->getTitle();
-		if (!title.empty())
-		{
-			cout << title << endl;
-			cout << string(title.length(), '-') << endl;
-		}
-
-		for (size_t i = 0; i < currentMenuItems.size(); i++)
-		{
-			cout << (i == selectedIndex ? '>' : ' ');
-			cout << currentMenuItems[i];
-			cout << (i == selectedIndex ? '<' : ' ');
-			cout << endl;
-		}
-
-		// Key handling
-		auto keyCode = _getch();
-		if (keyCode == Enter)  // Enter
-		{
-			menuStack.top()->onSelect();
-		}
-		else if (keyCode == SpecialKeys) // Navigation via arrows
-		{
-			keyCode = _getch();
-			if (keyCode == ArrowUp) // Up
-			{
-				if (--selectedIndex == std::numeric_limits<size_t>::max())
-					selectedIndex = currentMenuItems.size() - 1;
-			}
-			else if (keyCode == ArrowDown) // Down
-			{
-				if (++selectedIndex >= currentMenuItems.size())
-					selectedIndex = 0;
-			}
-		}
-		else if (keyCode >= Key1 && keyCode <= Key9) // Select via numbers
-		{
-			const size_t idx = keyCode - Key1;
-			if (idx < currentMenuItems.size())
-			{
-				menuStack.top()->selectedIndex = idx;
-				menuStack.top()->onSelect();
-			}
-		}
-	}
-
-	return 0;
+	// Run menu
+	const auto exitCode = runMenu<MainMenu>();
+	return exitCode;
 }

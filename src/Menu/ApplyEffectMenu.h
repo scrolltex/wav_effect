@@ -2,10 +2,10 @@
 #include "MenuBase.h"
 #include "WavManager.h"
 
-class ApplyEffectMenu : public MenuBase
+class ApplyEffectMenu final : public MenuBase
 {
 public:
-	explicit ApplyEffectMenu(std::stack<std::unique_ptr<MenuBase>>* menuStack);
+	explicit ApplyEffectMenu(MenuStack* menuStack);
 
 	void onSelect() override;
 

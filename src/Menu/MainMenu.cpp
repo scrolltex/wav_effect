@@ -1,10 +1,10 @@
+#include <iostream>
 #include "MainMenu.h"
 #include "ApplyEffectMenu.h"
-#include <iostream>
 
 using namespace std;
 
-MainMenu::MainMenu(stack<unique_ptr<MenuBase>>* menuStack) : MenuBase(menuStack)
+MainMenu::MainMenu(MenuStack* menuStack) : MenuBase(menuStack)
 {
 	m_title = "Main menu";
 	m_menuItems = {
@@ -35,7 +35,8 @@ void MainMenu::onSelect()
 			quit();
 			break;
 
-		default: ;
+		default: 
+			throw std::exception("Unknown menu item index: " + selectedIndex);
 	}
 }
 

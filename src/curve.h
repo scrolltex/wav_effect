@@ -1,6 +1,5 @@
 #pragma once
 #include "utility.h"
-#include <algorithm>
 
 enum CurveType
 {
@@ -22,7 +21,7 @@ enum CurveType
 	{
 		case Logarithmic: return log(1.f / (1.f - (exp(1.f) - 1.f) * (x - 1.f))) + 1.f;
 		case Sine: return pow(sin((5.f * x) / pi), 2);
-		case Linear:
-		default: return x;
+		case Linear: return x;
+		default: throw std::exception("Unknown curve type");
 	}
 }

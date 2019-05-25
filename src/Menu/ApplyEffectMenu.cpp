@@ -6,7 +6,7 @@
 using namespace std;
 using namespace effects;
 
-ApplyEffectMenu::ApplyEffectMenu(stack<unique_ptr<MenuBase>>* menuStack) : MenuBase(menuStack)
+ApplyEffectMenu::ApplyEffectMenu(MenuStack* menuStack) : MenuBase(menuStack)
 {
 	m_title = "Apply effect";
 	m_menuItems = {
@@ -76,7 +76,8 @@ void ApplyEffectMenu::onSelect()
 			distortion();
 			break;
 
-		default: throw out_of_range("Effect idx out-of-range: " + std::to_string(selectedIndex));
+		default: 
+			throw out_of_range("Effect idx out-of-range: " + to_string(selectedIndex));
 	}
 
 	m_wm.isFileUnsaved = true;

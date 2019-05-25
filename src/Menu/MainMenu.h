@@ -2,10 +2,10 @@
 #include "MenuBase.h"
 #include "WavManager.h"
 
-class MainMenu : public MenuBase
+class MainMenu final : public MenuBase
 {
 public:
-	explicit MainMenu(std::stack<std::unique_ptr<MenuBase>>* menuStack);
+	explicit MainMenu(MenuStack* menuStack);
 
 	void onSelect() override;
 

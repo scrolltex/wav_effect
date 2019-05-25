@@ -21,13 +21,16 @@ enum KeyCode
 	Key9 = 57
 };
 
+class MenuBase;
+typedef std::stack<std::unique_ptr<MenuBase>> MenuStack;
+
 /**
  * \brief Menu base class
  */
 class MenuBase
 {
 public:
-	explicit MenuBase(std::stack<std::unique_ptr<MenuBase>>* menuStack) : m_menuStack(menuStack)
+	explicit MenuBase(MenuStack* menuStack) : m_menuStack(menuStack)
 	{
 		selectedIndex = 0;
 	}
@@ -123,5 +126,5 @@ public:
 protected:
 	std::string m_title;
 	std::vector<std::string> m_menuItems;
-	std::stack<std::unique_ptr<MenuBase>>* m_menuStack;
+	MenuStack* m_menuStack;
 };
