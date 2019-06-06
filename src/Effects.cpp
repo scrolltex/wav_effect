@@ -7,24 +7,24 @@
 
 using std::clamp;
 
-void effects::monoToStereo(WavFile<float>& wav)
+void effects::MonoToStereo(WavFile<float>& wav)
 {
-	if (!wav.isMono())
+	if (!wav.IsMono())
 		throw std::invalid_argument("Wave file must be mono");
 
-	wav.setNumChannels(2);
+	wav.SetNumChannels(2);
 	std::copy(wav.samples[0].begin(), wav.samples[0].end(), wav.samples[1].begin());
 }
 
-void effects::applyRotatingStereo(WavFile<float>& wav, float rate)
+void effects::ApplyRotatingStereo(WavFile<float>& wav, float rate)
 {
-	if (!wav.isStereo())
+	if (!wav.IsStereo())
 		throw std::invalid_argument("Wave file must be a stereo");
 
 	if (rate <= 0)
 		throw std::invalid_argument("Rate must be greater than 0");
 
-	for (size_t i = 0; i < wav.getNumSamplesPerChannel(); i++)
+	for (size_t i = 0; i < wav.GetNumSamplesPerChannel(); i++)
 	{
 		const float x = static_cast<float>(i) / static_cast<float>(wav.sampleRate) * rate;
 		wav.samples[0][i] *= sin(x);
@@ -32,72 +32,72 @@ void effects::applyRotatingStereo(WavFile<float>& wav, float rate)
 	}
 }
 
-void effects::applyVolume(WavFile<float>& wav, float volume_db)
+void effects::ApplyVolume(WavFile<float>& wav, float volume_db)
 {
 	for (auto& channel : wav.samples)
 		for (auto& sample : channel)
-			sample = db2lin(lin2db(sample) + volume_db);
+			sample = db_to_lin(lin_to_db(sample) + volume_db);
 }
 
-void effects::applyReverse(WavFile<float>& wav)
+void effects::ApplyReverse(WavFile<float>& wav)
 {
 	for (auto& channel : wav.samples)
 		std::reverse(channel.begin(), channel.end());
 }
 
-void effects::applyDelay(WavFile<float>& wav, int delayMillis, float decay)
+void effects::ApplyDelay(WavFile<float>& wav, int delay_millis, float decay)
 {
 	for (int i = 0; i < static_cast<int>(wav.samples.size()); i++)
-		applyDelay(wav, i, delayMillis, decay);
+		ApplyDelay(wav, i, delay_millis, decay);
 }
 
-void effects::applyDelay(WavFile<float>& wav, size_t channelIdx, int delayMillis, float decay)
+void effects::ApplyDelay(WavFile<float>& wav, size_t channel_idx, int delay_millis, float decay)
 {
-	if (channelIdx >= wav.getNumChannels())
+	if (channel_idx >= wav.GetNumChannels())
 		throw std::out_of_range("Channel");
 
-	if (delayMillis <= 0 || delayMillis * 0.001 > wav.getLengthInSeconds())
+	if (delay_millis <= 0 || delay_millis * 0.001 > wav.GetLengthInSeconds())
 		throw std::out_of_range("Delay time");
 
 	if (decay <= 0)
 		throw std::invalid_argument("Decay must be greater than 0");
 
-	const int delaySamples = static_cast<int>(static_cast<float>(delayMillis) * (wav.sampleRate / 1000.f));
-	for (size_t i = 0; i < wav.samples[channelIdx].size() - delaySamples; i++)
-		wav.samples[channelIdx][i + delaySamples] += wav.samples[channelIdx][i] * decay;
+	const int delaySamples = static_cast<int>(static_cast<float>(delay_millis) * (wav.sampleRate / 1000.f));
+	for (size_t i = 0; i < wav.samples[channel_idx].size() - delaySamples; i++)
+		wav.samples[channel_idx][i + delaySamples] += wav.samples[channel_idx][i] * decay;
 }
 
-void effects::applyReverberation(WavFile<float>& wav)
+void effects::ApplyReverberation(WavFile<float>& wav)
 {
 	// TODO: Make reverberation customizable
-	applyDelay(wav, 100, 0.75f);
-	applyDelay(wav, 250, 0.35f);
-	applyDelay(wav, 500, 0.15f);
+	ApplyDelay(wav, 100, 0.75f);
+	ApplyDelay(wav, 250, 0.35f);
+	ApplyDelay(wav, 500, 0.15f);
 }
 
-void effects::applyCompressor(WavFile<float>& wav, float threshold, float ratio, bool downward)
+void effects::ApplyCompressor(WavFile<float>& wav, float threshold, float ratio, bool downward)
 {
 	for (auto& channel : wav.samples)
 	{
 		for (auto& sample : channel)
 		{
-			const auto sample_db = lin2db(sample);
+			const auto sample_db = lin_to_db(sample);
 
 			if (downward)
 			{
 				if (sample_db > threshold)
-					sample = sign(sample) * db2lin((sample_db - threshold) / ratio + threshold);				
+					sample = sign(sample) * db_to_lin((sample_db - threshold) / ratio + threshold);				
 			}
 			else
 			{
 				if (sample_db < threshold)
-					sample = sign(sample) * db2lin(threshold - ((threshold - sample_db) / ratio));				
+					sample = sign(sample) * db_to_lin(threshold - ((threshold - sample_db) / ratio));				
 			}
 		}
 	}
 }
 
-void effects::applyDistortion(WavFile<float>& wav, float drive, float blend, float volume)
+void effects::ApplyDistortion(WavFile<float>& wav, float drive, float blend, float volume)
 {
 	const float range = 1000.f;
 
@@ -109,49 +109,49 @@ void effects::applyDistortion(WavFile<float>& wav, float drive, float blend, flo
 	{
 		for (auto& sample : channel)
 		{
-			const auto cleanSample = sample;
+			const auto clean_sample = sample;
 
 			sample *= drive * range;
-			sample = (2.f / pi * static_cast<float>(atan(sample)) * blend + cleanSample * (1.f - blend)) / 2.f * volume;
+			sample = (2.f / kPi * static_cast<float>(atan(sample)) * blend + clean_sample * (1.f - blend)) / 2.f * volume;
 		}
 	}
 }
 
-void effects::applyFadeIn(WavFile<float>& wav, float time, CurveType curveType)
+void effects::ApplyFadeIn(WavFile<float>& wav, float time, CurveType curve_type)
 {
-	if (time <= 0 || time > wav.getLengthInSeconds())
+	if (time <= 0 || time > wav.GetLengthInSeconds())
 		throw std::invalid_argument("Invalid fade time");
 
 	const float fade_samples = time * wav.sampleRate;
 	for(auto& channel : wav.samples)
-		for(size_t i = 0; i < fade_samples && i < wav.getNumSamplesPerChannel(); i++)
-			channel[i] *= applyCurve(static_cast<float>(i) / fade_samples, curveType);
+		for(size_t i = 0; i < fade_samples && i < wav.GetNumSamplesPerChannel(); i++)
+			channel[i] *= ApplyCurve(static_cast<float>(i) / fade_samples, curve_type);
 }
 
-void effects::applyFadeOut(WavFile<float>& wav, float time, CurveType curveType)
+void effects::ApplyFadeOut(WavFile<float>& wav, float time, CurveType curve_type)
 {
-	if (time <= 0 || time > wav.getLengthInSeconds())
+	if (time <= 0 || time > wav.GetLengthInSeconds())
 		throw std::invalid_argument("Invalid fade time");
 
-	const size_t samples_count = wav.getNumSamplesPerChannel();
+	const size_t samples_count = wav.GetNumSamplesPerChannel();
 	const size_t fade_samples = time * wav.sampleRate; // fade time in samples
 	const size_t start_pos = samples_count - fade_samples; // sample that starts
 
 	for (auto& channel : wav.samples)
 		for (size_t i = start_pos; i < samples_count; i++)
-			channel[i] *= 1.f - applyCurve(static_cast<float>(i - start_pos) / fade_samples, curveType);
+			channel[i] *= 1.f - ApplyCurve(static_cast<float>(i - start_pos) / fade_samples, curve_type);
 }
 
-void effects::applyTremolo(WavFile<float>& wav, float freq, float dry, float wet)
+void effects::ApplyTremolo(WavFile<float>& wav, float freq, float dry, float wet)
 {
 	dry = clamp(dry, 0.f, 1.f);
 	wet = clamp(wet, 0.f, 1.f);
 
-	const auto sineWave = generateSineWave(freq, 
-		static_cast<float>(wav.getNumSamplesPerChannel()) / wav.sampleRate, 
+	const auto sine_wave = GenerateSineWave(freq, 
+		static_cast<float>(wav.GetNumSamplesPerChannel()) / wav.sampleRate, 
 		wav.sampleRate);
 	
 	for (auto& channel : wav.samples)
 		for (size_t i = 0; i < channel.size(); i++)
-			channel[i] = (channel[i] * dry) + ((channel[i] * (sineWave[i] / 2.f + 0.5f)) * wet);
+			channel[i] = (channel[i] * dry) + ((channel[i] * (sine_wave[i] / 2.f + 0.5f)) * wet);
 }

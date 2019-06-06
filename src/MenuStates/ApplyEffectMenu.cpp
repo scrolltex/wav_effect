@@ -1,15 +1,14 @@
 #include <iostream>
 #include "ApplyEffectMenu.h"
-#include "WavManager.h"
 #include "../Effects.h"
 
 using namespace std;
 using namespace effects;
 
-ApplyEffectMenu::ApplyEffectMenu(MenuStack* menuStack) : MenuBase(menuStack)
+ApplyEffectMenu::ApplyEffectMenu(MenuStack* menu_stack) : MenuStateBase(menu_stack)
 {
-	m_title = "Apply effect";
-	m_menuItems = {
+	title_ = "Apply effect";
+	menu_items_ = {
 		"Back",
 		"Mono -> Stereo",
 		"Reverse",
@@ -24,20 +23,20 @@ ApplyEffectMenu::ApplyEffectMenu(MenuStack* menuStack) : MenuBase(menuStack)
 	};
 }
 
-void ApplyEffectMenu::onSelect()
+void ApplyEffectMenu::OnSelect()
 {
 	// Back
-	if (selectedIndex == 0)
+	if (selected_index_ == 0)
 	{
-		back();
+		Back();
 		return;
 	}
 
 	system("cls");
-	switch (selectedIndex)
+	switch (selected_index_)
 	{
 		case 1: // Mono -> Stereo
-			monoToStereo();
+			mono_to_stereo();
 			break;
 
 		case 2: // Reverse
@@ -77,68 +76,68 @@ void ApplyEffectMenu::onSelect()
 			break;
 
 		default: 
-			throw out_of_range("Effect idx out-of-range: " + to_string(selectedIndex));
+			throw out_of_range("Effect idx out-of-range: " + to_string(selected_index_));
 	}
 
-	m_wm.isFileUnsaved = true;
-	waitForEscape();
+	wm_.isFileUnsaved = true;
+	WaitForEscape();
 }
 
-void ApplyEffectMenu::monoToStereo() const
+void ApplyEffectMenu::mono_to_stereo() const
 {
-	if (!m_wm.wav.isMono())
+	if (!wm_.wav.IsMono())
 	{
 		cout << "File not in mono. Aborting." << endl;
 		return;
 	}
 
 	cout << "Converting mono to stereo...";
-	effects::monoToStereo(m_wm.wav);
+	MonoToStereo(wm_.wav);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::reverse() const
 {
 	cout << "Reversing audio...";
-	applyReverse(m_wm.wav);
+	ApplyReverse(wm_.wav);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::volume() const
 {
 	cout << "Enter volume for increasing in dB: ";
-	const auto volume = readValue<float>();
+	const auto volume = ReadValue<float>();
 
 	cout << "Applying volume...";
-	applyVolume(m_wm.wav, volume);
+	ApplyVolume(wm_.wav, volume);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::reverberation() const
 {
 	cout << "Applying reverberation...";
-	applyReverberation(m_wm.wav);
+	ApplyReverberation(wm_.wav);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::rotating() const
 {
-	if (m_wm.wav.isMono())
+	if (wm_.wav.IsMono())
 	{
-		if (!dialog("File must be in stereo. Convert into it?"))
+		if (!Ask("File must be in stereo. Convert into it?"))
 		{
 			cout << "Aborting." << endl;
 			return;
 		}
 
-		monoToStereo();
+		mono_to_stereo();
 	}
 
 	cout << "Enter rotating rate in seconds: ";
-	const auto rate = readValue<float>(&greaterThanZero);
+	const auto rate = ReadValue<float>(&GreaterThanZero);
 
 	cout << "Applying rotating...";
-	applyRotatingStereo(m_wm.wav, rate);
+	ApplyRotatingStereo(wm_.wav, rate);
 	cout << "Done" << endl;
 }
 
@@ -147,11 +146,15 @@ void ApplyEffectMenu::fade() const
 	// Enter fade type
 	cout << "Fade type: 1 - fade in, 0 - fade out." << endl
 		<< "Enter fade type: ";
-	const bool isFadeIn = readValue<int>([](auto value) { return value == 0 || value == 1; }) == 1;
+	const bool is_fade_in = ReadValue<int>([](auto value) {
+		return value == 0 || value == 1;
+	}) == 1;
 
 	// Enter time
 	cout << "Enter fade time in seconds: ";
-	const auto fadeTime = readValue<float>([&](auto value) { return value > 0 && value < m_wm.wav.getLengthInSeconds(); });
+	const auto fade_time = ReadValue<float>([&](auto value) {
+		return value > 0 && value < wm_.wav.GetLengthInSeconds();
+	});
 
 	// Enter curve
 	cout << "Curve type:" << endl
@@ -159,75 +162,81 @@ void ApplyEffectMenu::fade() const
 		<< " 2 - Logarithmic" << endl
 		<< " 3 - Sine" << endl;
 	cout << "Enter curve type: ";
-	const auto curveType = static_cast<CurveType>(readValue<int>([](auto value) { return value >= 1 && value <= 3; }));
+	const auto curve_type = static_cast<CurveType>(ReadValue<int>([](auto value) {
+		return value >= 1 && value <= 3;
+	}));
 
 	// Apply fade
 	cout << "Applying fade...";
-	if (isFadeIn)
-		applyFadeIn(m_wm.wav, fadeTime, curveType);
+	if (is_fade_in)
+		ApplyFadeIn(wm_.wav, fade_time, curve_type);
 	else
-		applyFadeOut(m_wm.wav, fadeTime, curveType);
+		ApplyFadeOut(wm_.wav, fade_time, curve_type);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::tremolo() const
 {
 	cout << "Enter tremolo frequency in Hz: ";
-	const auto freq = readValue<float>(&greaterThanZero);
+	const auto freq = ReadValue<float>(&GreaterThanZero);
 
 	cout << "Enter dry signal percent (0..1): ";
-	const auto dry = readValue<float>(&isNormalizedValue);
+	const auto dry = ReadValue<float>(&IsNormalizedValue);
 
 	cout << "Applying tremolo...";
-	applyTremolo(m_wm.wav, freq, dry, 1.f - dry);
+	ApplyTremolo(wm_.wav, freq, dry, 1.f - dry);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::delay() const
 {
 	cout << "Enter delay time in ms: ";
-	const auto delayTime = readValue<float>(&greaterThanZero);
+	const auto delay_time = ReadValue<float>(&GreaterThanZero);
 
 	cout << "Enter decay: ";
-	const auto decay = readValue<float>(&isNormalizedValue);
+	const auto decay = ReadValue<float>(&IsNormalizedValue);
 
 	cout << "Enter channel num, or 0 for applying on all channels: ";
-	const auto channelIdx = readValue<size_t>([this](auto value) {
-		return value >= 0 && value <= m_wm.wav.getNumChannels();
+	const auto channel_idx = ReadValue<size_t>([this](auto value) {
+		return value >= 0 && value <= wm_.wav.GetNumChannels();
 	}) - 1;
 
 	cout << "Applying delay...";
-	if (channelIdx == 0)
-		applyDelay(m_wm.wav, delayTime, decay);
+	if (channel_idx == 0)
+		ApplyDelay(wm_.wav, delay_time, decay);
 	else
-		applyDelay(m_wm.wav, channelIdx - 1, delayTime, decay);
+		ApplyDelay(wm_.wav, channel_idx - 1, delay_time, decay);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::compressor() const
 {
 	cout << "Enter threshold (in dB) for compressor: ";
-	const auto threshold = readValue<float>([](auto value) { return value <= 0; });
+	const auto threshold = ReadValue<float>([](auto value) {
+		return value <= 0;
+	});
 
 	cout << "Enter ratio:";
-	const auto ratio = readValue<float>([](auto value) { return value >= 1; });
+	const auto ratio = ReadValue<float>([](auto value) {
+		return value >= 1;
+	});
 
-	const bool downward = dialog("Compress downward?");
+	const bool downward = Ask("Compress downward?");
 
 	cout << "Applying compressor...";
-	applyCompressor(m_wm.wav, threshold, ratio, downward);
+	ApplyCompressor(wm_.wav, threshold, ratio, downward);
 	cout << "Done" << endl;
 }
 
 void ApplyEffectMenu::distortion() const
 {
 	cout << "Enter distortion drive (0..1): ";
-	const auto drive = readValue<float>(&isNormalizedValue);
+	const auto drive = ReadValue<float>(&IsNormalizedValue);
 
 	cout << "Enter blend (0..1): ";
-	const auto blend = readValue<float>(&isNormalizedValue);
+	const auto blend = ReadValue<float>(&IsNormalizedValue);
 
 	cout << "Applying distortion...";
-	applyDistortion(m_wm.wav, drive, blend);
+	ApplyDistortion(wm_.wav, drive, blend);
 	cout << "Done" << endl;
 }

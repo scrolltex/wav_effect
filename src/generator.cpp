@@ -1,19 +1,19 @@
 #include "generator.h"
 #include "utility.h"
 
-std::vector<float> generateSilence(float length, float sampleRate)
+std::vector<float> GenerateSilence(float length, float sample_rate)
 {
-	length = floor(length * sampleRate);
+	length = floor(length * sample_rate);
 	std::vector<float> samples;
 	std::fill_n(samples.begin(), length, 0);
 	return samples;
 }
 
-std::vector<float> generateWaveInput(float freq, float length, float sampleRate, float phase)
+std::vector<float> GenerateWaveInput(float freq, float length, float sample_rate, float phase)
 {
-	length = ceil(length * sampleRate);
-	phase *= sampleRate;
-	const float factor = freq * (pi * 2) / sampleRate;
+	length = ceil(length * sample_rate);
+	phase *= sample_rate;
+	const float factor = freq * (kPi * 2) / sample_rate;
 
 	std::vector<float> samples;
 	for (size_t i = 0; i < length; i++)
@@ -21,9 +21,9 @@ std::vector<float> generateWaveInput(float freq, float length, float sampleRate,
 	return samples;
 }
 
-std::vector<float> generateSineWave(float freq, float length, float sampleRate, float phase)
+std::vector<float> GenerateSineWave(float freq, float length, float sample_rate, float phase)
 {
-	auto wave = generateWaveInput(freq, length, sampleRate, phase);
+	auto wave = GenerateWaveInput(freq, length, sample_rate, phase);
 	for (auto& sample : wave)
 		sample = sin(sample);
 	return wave;

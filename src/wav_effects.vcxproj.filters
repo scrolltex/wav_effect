@@ -7,6 +7,9 @@
     <Filter Include="src\Menu">
       <UniqueIdentifier>{6e5470d6-ced5-4eda-a437-1c76236dec54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\MenuStates">
+      <UniqueIdentifier>{f45f2621-da30-412d-a530-7ac3fdcd5710}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WavFile.cpp">
@@ -21,11 +24,11 @@
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="Menu\MainMenu.cpp">
-      <Filter>src\Menu</Filter>
+    <ClCompile Include="MenuStates\ApplyEffectMenu.cpp">
+      <Filter>src\MenuStates</Filter>
     </ClCompile>
-    <ClCompile Include="Menu\ApplyEffectMenu.cpp">
-      <Filter>src\Menu</Filter>
+    <ClCompile Include="MenuStates\MainMenu.cpp">
+      <Filter>src\MenuStates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,17 +47,20 @@
     <ClInclude Include="WavFile.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\ApplyEffectMenu.h">
+    <ClInclude Include="Menu\Menu.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\WavManager.h">
+    <ClInclude Include="Menu\MenuStateBase.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\MenuBase.h">
-      <Filter>src\Menu</Filter>
+    <ClInclude Include="MenuStates\ApplyEffectMenu.h">
+      <Filter>src\MenuStates</Filter>
     </ClInclude>
-    <ClInclude Include="Menu\MainMenu.h">
-      <Filter>src\Menu</Filter>
+    <ClInclude Include="MenuStates\MainMenu.h">
+      <Filter>src\MenuStates</Filter>
+    </ClInclude>
+    <ClInclude Include="WavManager.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
